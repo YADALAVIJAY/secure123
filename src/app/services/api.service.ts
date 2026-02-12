@@ -48,4 +48,8 @@ export class ApiService {
     // Note: Profile endpoint is in AuthController, so we use authUrl base
     return this.http.get('http://localhost:8088/api/auth/profile', { headers: this.getHeaders() });
   }
+
+  verifyPassword(password: string): Observable<any> {
+    return this.http.post('http://localhost:8088/api/auth/verify-password', { password }, { headers: this.getHeaders() });
+  }
 }

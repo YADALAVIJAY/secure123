@@ -28,17 +28,17 @@ export class ReceivedFilesComponent implements OnInit {
 
   loadReceivedFiles() {
     this.isLoading = true;
-    this.toastService.show('Loading received files...', 'info');
+    // this.toastService.show('Loading received files...', 'info');
 
     this.apiService.getInbox().subscribe({
       next: (files) => {
         this.receivedFiles = files;
         this.isLoading = false;
-        if (files.length === 0) {
-          this.toastService.show('No received files found', 'info');
-        } else {
-          this.toastService.show(`Loaded ${files.length} received file(s)`, 'success');
-        }
+        // if (files.length === 0) {
+        //   this.toastService.show('No received files found', 'info');
+        // } else {
+        //   this.toastService.show(`Loaded ${files.length} received file(s)`, 'success');
+        // }
       },
       error: (error) => {
         console.error('Failed to load received files', error);

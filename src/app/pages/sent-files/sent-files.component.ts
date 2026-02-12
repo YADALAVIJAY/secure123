@@ -22,17 +22,17 @@ export class SentFilesComponent implements OnInit {
 
   loadSentFiles() {
     this.isLoading = true;
-    this.toastService.show('Loading sent files...', 'info');
+    // this.toastService.show('Loading sent files...', 'info');
 
     this.apiService.getSentFiles().subscribe({
       next: (files) => {
         this.sentFiles = files;
         this.isLoading = false;
-        if (files.length === 0) {
-          this.toastService.show('No sent files found', 'info');
-        } else {
-          this.toastService.show(`Loaded ${files.length} sent file(s)`, 'success');
-        }
+        // if (files.length === 0) {
+        //   this.toastService.show('No sent files found', 'info');
+        // } else {
+        //   this.toastService.show(`Loaded ${files.length} sent file(s)`, 'success');
+        // }
       },
       error: (error) => {
         console.error('Failed to load sent files', error);

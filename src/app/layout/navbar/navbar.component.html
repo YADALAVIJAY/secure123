@@ -8,7 +8,6 @@
             <a (click)="handleNav('/')" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Send</a>
             <a (click)="handleNav('/sent')" routerLinkActive="active">Sent</a>
             <a (click)="handleNav('/inbox')" routerLinkActive="active">Inbox</a>
-            <a (click)="handleNav('/receive')" routerLinkActive="active">Receive</a>
             <a (click)="handleNav('/profile')" routerLinkActive="active" *ngIf="isLoggedIn()">
                 <i class="fa-solid fa-user-circle"></i> Profile
             </a>

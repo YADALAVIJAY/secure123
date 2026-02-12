@@ -46,10 +46,7 @@
                                 [class.fa-eye-slash]="showPrivateKey"></i>
                             {{ showPrivateKey ? 'Hide' : 'Show' }}
                         </button>
-                        <button class="btn-copy" (click)="copyToClipboard(privateKey, 'Private key')">
-                            <i class="fa-solid fa-copy"></i>
-                            Copy
-                        </button>
+                        <!-- Copy button removed as requested -->
                         <button class="btn-download" (click)="downloadPrivateKey()">
                             <i class="fa-solid fa-download"></i>
                             Download
@@ -69,6 +66,29 @@
                         <p>Never share your private key. You need it to decrypt files sent to you.</p>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Password Verification Modal -->
+<div class="modal-overlay" *ngIf="showPasswordModal">
+    <div class="modal-card glass-panel">
+        <div class="modal-header">
+            <h3><i class="fa-solid fa-lock"></i> Verify Identity</h3>
+            <button class="btn-close" (click)="closePasswordModal()"><i class="fa-solid fa-times"></i></button>
+        </div>
+        <div class="modal-body">
+            <p>Please enter your password to access your Private Key.</p>
+            <div class="form-group">
+                <input type="password" [(ngModel)]="passwordInput" placeholder="Enter your password"
+                    (keyup.enter)="verifyPassword()" autofocus>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-cancel" (click)="closePasswordModal()">Cancel</button>
+                <button class="btn-verify" (click)="verifyPassword()" [disabled]="!passwordInput || verifyLoading">
+                    {{ verifyLoading ? 'Verifying...' : 'Verify' }}
+                </button>
             </div>
         </div>
     </div>

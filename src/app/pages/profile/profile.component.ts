@@ -48,10 +48,6 @@ export class ProfileComponent implements OnInit {
     });
   }
 
-  togglePrivateKeyVisibility() {
-    this.showPrivateKey = !this.showPrivateKey;
-  }
-
   copyToClipboard(text: string, label: string) {
     navigator.clipboard.writeText(text).then(() => {
       this.toastService.show(`${label} copied to clipboard!`, 'success');
@@ -61,6 +57,58 @@ export class ProfileComponent implements OnInit {
   }
 
   downloadPrivateKey() {
+    this.pendingAction = 'download';
+    this.showPasswordModal = true;
+  }
+
+  togglePrivateKeyVisibility() {
+    if (this.showPrivateKey) {
+      this.showPrivateKey = false;
+    } else {
+      this.pendingAction = 'show';
+      this.showPasswordModal = true;
+    }
+  }
+
+  // Password Modal Logic
+  showPasswordModal: boolean = false;
+  passwordInput: string = '';
+  pendingAction: 'show' | 'download' | null = null;
+  verifyLoading: boolean = false;
+
+  closePasswordModal() {
+    this.showPasswordModal = false;
+    this.passwordInput = '';
+    this.pendingAction = null;
+  }
+
+  verifyPassword() {
+    if (!this.passwordInput) return;
+
+    this.verifyLoading = true;
+    this.apiService.verifyPassword(this.passwordInput).subscribe({
+      next: () => {
+        this.verifyLoading = false;
+        this.toastService.show('Password verified!', 'success');
+
+        if (this.pendingAction === 'show') {
+          this.showPrivateKey = true;
+        } else if (this.pendingAction === 'download') {
+          this.performDownload();
+        }
+
+        this.closePasswordModal();
+      },
+      error: (error) => {
+        this.verifyLoading = false;
+        // console.error('Verification error:', error); // debugging
+        const msg = error.error?.message || 'Invalid credentials';
+        this.toastService.show(msg, 'error');
+      }
+    });
+  }
+
+  performDownload() {
     const blob = new Blob([this.privateKey], { type: 'text/plain' });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
