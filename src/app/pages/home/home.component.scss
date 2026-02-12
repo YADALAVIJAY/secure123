@@ -30,9 +30,68 @@
         }
     }
 
+    .mobile-break {
+        display: none;
+    }
+
     .receiver-section {
         margin-bottom: 2.5rem;
         width: 100%;
+
+        @media (max-width: 768px) {
+            .mobile-break {
+                display: block;
+                /* Break line on mobile */
+            }
+
+            h1 {
+                font-size: 2.5rem;
+                /* Smaller title */
+
+                .highlight {
+                    &::after {
+                        bottom: 2px;
+                        height: 8px;
+                        /* Adjust highlight */
+                    }
+                }
+            }
+
+            .subtitle {
+                font-size: 1rem;
+                max-width: 90%;
+                /* Ensure text doesn't touch edges */
+            }
+
+            .upload-area {
+                width: 280px;
+                height: 280px;
+                /* Smaller circle */
+
+                .circle-content {
+                    i {
+                        font-size: 3rem;
+                    }
+
+                    span {
+                        font-size: 1.25rem;
+                    }
+                }
+            }
+
+            .security-badges {
+                flex-wrap: wrap;
+                /* Allow badges to wrap */
+                justify-content: center;
+                gap: 10px;
+
+                .badge {
+                    font-size: 0.75rem;
+                    padding: 4px 10px;
+                }
+            }
+        }
+
         max-width: 500px;
 
         label {

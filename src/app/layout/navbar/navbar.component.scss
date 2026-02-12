@@ -78,8 +78,37 @@
 }
 
 @media (max-width: 768px) {
+    .navbar {
+        width: 95%;
+        /* Use more width on mobile */
+        padding: 10px 0;
+        top: 10px;
+    }
+
+    .nav-content {
+        flex-direction: column;
+        gap: 15px;
+        /* Space between logo, links, and auth */
+    }
+
     .nav-links {
-        display: none;
-        /* Mobile menu to be implemented if needed */
+        display: flex;
+        /* Show links on mobile */
+        gap: 15px;
+        flex-wrap: wrap;
+        justify-content: center;
+
+        a {
+            font-size: 0.9rem;
+        }
+    }
+
+    .logo {
+        font-size: 1.25rem;
+        /* Slightly smaller logo */
+    }
+
+    .auth-buttons {
+        gap: 15px;
     }
 }

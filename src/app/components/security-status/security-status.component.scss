@@ -42,11 +42,25 @@
 }
 
 
-@media (max-width: 480px) {
+@media (max-width: 768px) {
     .security-badge {
-        bottom: 10px;
-        right: 50%;
-        transform: translateX(50%);
-        width: max-content;
+        bottom: 20px;
+        left: 50%;
+        right: auto;
+        transform: translateX(-50%);
+        width: 90%;
+        /* Fit within screen */
+        max-width: 350px;
+        padding: 0.75rem 1rem;
+
+        .status-header {
+            justify-content: center;
+        }
+
+        .details {
+            justify-content: center;
+            flex-wrap: wrap;
+            /* Allow badges to wrap */
+        }
     }
 }
