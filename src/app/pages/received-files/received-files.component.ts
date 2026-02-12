@@ -12,6 +12,33 @@ export class ReceivedFilesComponent implements OnInit {
   isLoading = true;
   downloadingFileId: number | null = null;
 
+  // Modal properties
+  showEncryptedModal = false;
+  encryptedContent = '';
+  currentFileName = '';
+
+  viewEncrypted(fileId: number, fileName: string) {
+    this.apiService.downloadEncryptedFile(fileId).subscribe({
+      next: (blob) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          // Get the first 5000 characters to avoid freezing browser if file is huge
+          const text = reader.result as string;
+          this.encryptedContent = text.substring(0, 5000) + (text.length > 5000 ? '\n\n... [Content Truncated for Display] ...' : '');
+          this.currentFileName = fileName;
+          this.showEncryptedModal = true;
+        };
+        reader.readAsText(blob);
+      },
+      error: () => this.toastService.show('Failed to fetch encrypted content', 'error')
+    });
+  }
+
+  closeEncryptedModal() {
+    this.showEncryptedModal = false;
+    this.encryptedContent = '';
+  }
+
   // Private key modal state
   showPrivateKeyModal = false;
   selectedFileId: number | null = null;

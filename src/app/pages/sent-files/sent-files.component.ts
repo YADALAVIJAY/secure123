@@ -42,22 +42,30 @@ export class SentFilesComponent implements OnInit {
     });
   }
 
-  downloadEncrypted(fileId: number, fileName: string) {
+  // Modal properties
+  showEncryptedModal = false;
+  encryptedContent = '';
+  currentFileName = '';
+
+  viewEncrypted(fileId: number, fileName: string) {
     this.apiService.downloadEncryptedFile(fileId).subscribe({
       next: (blob) => {
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        // Append .txt so it opens in text editor to show encryption
-        a.download = `ENCRYPTED_${fileName}.txt`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        window.URL.revokeObjectURL(url);
-        this.toastService.show('Encrypted file downloaded!', 'success');
+        const reader = new FileReader();
+        reader.onload = () => {
+          const text = reader.result as string;
+          this.encryptedContent = text.substring(0, 5000) + (text.length > 5000 ? '\n\n... [Content Truncated for Display] ...' : '');
+          this.currentFileName = fileName;
+          this.showEncryptedModal = true;
+        };
+        reader.readAsText(blob);
       },
-      error: () => this.toastService.show('Failed to download encrypted file', 'error')
+      error: () => this.toastService.show('Failed to fetch encrypted content', 'error')
     });
+  }
+
+  closeEncryptedModal() {
+    this.showEncryptedModal = false;
+    this.encryptedContent = '';
   }
 
   formatDate(dateString: string): string {

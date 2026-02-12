@@ -43,6 +43,24 @@
         <p>Files sent to you will appear here</p>
     </div>
 
+    <!-- Encrypted Content Modal -->
+    <div class="modal-overlay" *ngIf="showEncryptedModal" (click)="closeEncryptedModal()">
+        <div class="modal-content" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+                <h3>Encrypted Content: {{currentFileName}}</h3>
+                <button class="close-btn" (click)="closeEncryptedModal()"><i class="fa-solid fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <p class="info-text">This is how your file looks on the server (AES-256 Encrypted).</p>
+                <div class="code-block">
+                    <pre>{{encryptedContent}}</pre>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" (click)="closeEncryptedModal()">Close</button>
+            </div>
+        </div>
+    </div>
     <div class="loading-state" *ngIf="isLoading">
         <div class="spinner"></div>
         <p>Loading received files...</p>

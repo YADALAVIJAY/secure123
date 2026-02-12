@@ -220,6 +220,59 @@ button {
         flex: 1;
         justify-content: center;
     }
+
+    @media (max-width: 768px) {
+        .profile-container {
+            padding: 1rem;
+        }
+
+        .profile-card {
+            padding: 1.5rem;
+
+            .profile-header {
+                flex-direction: column;
+                text-align: center;
+                gap: 1rem;
+
+                .avatar-circle {
+                    margin: 0 auto;
+                }
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .keys-section {
+                .key-box {
+                    padding: 1rem;
+
+                    .key-header {
+                        flex-direction: column;
+                        align-items: flex-start;
+                        gap: 0.5rem;
+
+                        button {
+                            width: 100%;
+                            justify-content: center;
+                        }
+                    }
+
+                    code {
+                        font-size: 0.75rem;
+                        /* Smaller font for keys on mobile */
+                    }
+                }
+            }
+        }
+
+        /* Password Modal Responsive */
+        .modal-overlay .modal-content {
+            width: 95%;
+            margin: 1rem;
+        }
+    }
 }
 
 /* Modal Styles */
