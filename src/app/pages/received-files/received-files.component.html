@@ -1,0 +1,54 @@
+<div class="received-files-container">
+    <div class="page-header glass-panel">
+        <h1><i class="fa-solid fa-inbox"></i> Received Files</h1>
+        <p class="subtitle">Securely encrypted files sent to you</p>
+    </div>
+
+    <div class="files-grid" *ngIf="!isLoading && receivedFiles.length > 0">
+        <div class="file-card glass-panel" *ngFor="let file of receivedFiles">
+            <div class="file-icon">
+                <i class="fa-solid fa-file-lock"></i>
+            </div>
+            <div class="file-info">
+                <h3 class="file-name">{{ file.fileName }}</h3>
+                <div class="file-meta">
+                    <span class="meta-item">
+                        <i class="fa-solid fa-user"></i>
+                        From: {{ file.senderUsername }}
+                    </span>
+                    <span class="meta-item">
+                        <i class="fa-solid fa-clock"></i>
+                        {{ formatDate(file.createdAt) }}
+                    </span>
+                </div>
+                <div class="security-badges">
+                    <span class="badge encrypted"><i class="fa-solid fa-lock"></i> Encrypted</span>
+                    <span class="badge signed"><i class="fa-solid fa-shield-check"></i> Signed</span>
+                </div>
+            </div>
+            <div class="file-actions">
+                <button class="btn-download" (click)="downloadFile(file.id, file.fileName)"
+                    [disabled]="isDownloading(file.id)">
+                    <i class="fa-solid" [class.fa-download]="!isDownloading(file.id)"
+                        [class.fa-spinner]="isDownloading(file.id)" [class.fa-spin]="isDownloading(file.id)"></i>
+                    {{ isDownloading(file.id) ? 'Verifying...' : 'Download & Verify' }}
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="empty-state" *ngIf="!isLoading && receivedFiles.length === 0">
+        <i class="fa-solid fa-inbox"></i>
+        <h2>No received files yet</h2>
+        <p>Files sent to you will appear here</p>
+    </div>
+
+    <div class="loading-state" *ngIf="isLoading">
+        <div class="spinner"></div>
+        <p>Loading received files...</p>
+    </div>
+
+    <app-private-key-modal [isVisible]="showPrivateKeyModal" [fileName]="selectedFileName"
+        (decrypt)="onPrivateKeyProvided($event)" (cancel)="onPrivateKeyCancelled()">
+    </app-private-key-modal>
+</div>

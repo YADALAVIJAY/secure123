@@ -1,0 +1,22 @@
+<div class="home-container">
+    <div class="content-wrapper glass-panel">
+        <div class="header">
+            <h1>We make file transfer <span class="highlight">simple</span></h1>
+            <p class="subtitle">Securely share your files with anyone, anywhere.</p>
+        </div>
+
+        <div class="upload-section">
+            <app-upload-circle (fileSelected)="onFileSelected($event)"></app-upload-circle>
+            <p class="drag-text">Click to browse or drag files here</p>
+        </div>
+
+        <div class="toggle-container">
+            <button class="toggle-btn active" (click)="handleToggle('/')">Send</button>
+            <button class="toggle-btn" (click)="handleToggle('/receive')">Receive</button>
+        </div>
+    </div>
+
+    <app-upload-modal [isVisible]="showUploadModal" [fileName]="selectedFileName" (upload)="onUploadConfirmed($event)"
+        (cancel)="onUploadCancelled()">
+    </app-upload-modal>
+</div>

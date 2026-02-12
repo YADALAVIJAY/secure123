@@ -1,0 +1,75 @@
+import { Component, OnInit } from '@angular/core';
+import { AuthService } from '../../services/auth.service';
+import { ApiService } from '../../services/api.service';
+import { ToastService } from '../../services/toast.service';
+
+@Component({
+  selector: 'app-profile',
+  templateUrl: './profile.component.html',
+  styleUrls: ['./profile.component.scss']
+})
+export class ProfileComponent implements OnInit {
+  username: string = '';
+  email: string = '';
+  publicKey: string = '';
+  privateKey: string = '';
+  showPrivateKey: boolean = false;
+  isLoading: boolean = true;
+
+  constructor(
+    private authService: AuthService,
+    private apiService: ApiService,
+    private toastService: ToastService
+  ) { }
+
+  ngOnInit(): void {
+    this.loadUserProfile();
+  }
+
+  loadUserProfile() {
+    this.isLoading = true;
+    // Get username from auth service
+    this.username = this.authService.getUsername() || '';
+
+    // Fetch real user profile from API
+    this.apiService.getUserProfile().subscribe({
+      next: (profile) => {
+        this.username = profile.username;
+        this.email = profile.email;
+        this.publicKey = profile.publicKey;
+        this.privateKey = profile.encryptedPrivateKey;
+        this.isLoading = false;
+      },
+      error: (error) => {
+        console.error('Failed to load profile', error);
+        this.toastService.show('Failed to load profile data', 'error');
+        this.isLoading = false;
+      }
+    });
+  }
+
+  togglePrivateKeyVisibility() {
+    this.showPrivateKey = !this.showPrivateKey;
+  }
+
+  copyToClipboard(text: string, label: string) {
+    navigator.clipboard.writeText(text).then(() => {
+      this.toastService.show(`${label} copied to clipboard!`, 'success');
+    }).catch(() => {
+      this.toastService.show('Failed to copy to clipboard', 'error');
+    });
+  }
+
+  downloadPrivateKey() {
+    const blob = new Blob([this.privateKey], { type: 'text/plain' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${this.username}_private_key.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+    this.toastService.show('Private key downloaded!', 'success');
+  }
+}
