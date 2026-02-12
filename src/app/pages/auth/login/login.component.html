@@ -2,6 +2,10 @@
     <div class="card glass-panel">
         <h2>Welcome Back</h2>
 
+        <div class="alert-error" *ngIf="errorMessage">
+            {{ errorMessage }}
+        </div>
+
         <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
             <div class="form-group">
                 <label>Username</label>

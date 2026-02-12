@@ -94,6 +94,9 @@ export class ReceivedFilesComponent implements OnInit {
           errorMessage = '✗ Invalid Private Key! You are using a fake key.';
         } else if (error.status === 400) {
           errorMessage = '✗ Decryption Failed! Invalid private key or corrupted file.';
+        } else if (error.status === 429) {
+          // Use the message from the backend which contains the time remaining
+          errorMessage = error.error?.message || '⛔ You are blocked! Too many failed attempts.';
         }
 
         this.toastService.show(errorMessage, 'error');

@@ -57,6 +57,20 @@ form {
     font-size: 0.8rem;
 }
 
+.alert-error {
+    background-color: rgba(220, 53, 69, 0.2);
+    color: #ff6b6b;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid rgba(220, 53, 69, 0.4);
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-weight: 500;
+}
+
 .btn-primary {
     width: 100%;
     padding: 12px;

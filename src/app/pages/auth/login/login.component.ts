@@ -11,6 +11,7 @@ import { ToastService } from '../../../services/toast.service';
 })
 export class LoginComponent implements OnInit {
   loginForm!: FormGroup;
+  errorMessage: string = '';
 
   constructor(
     private fb: FormBuilder,
@@ -24,6 +25,10 @@ export class LoginComponent implements OnInit {
       username: ['', Validators.required],
       password: ['', Validators.required]
     });
+
+    this.loginForm.valueChanges.subscribe(() => {
+      this.errorMessage = '';
+    });
   }
 
   onSubmit() {
@@ -35,7 +40,10 @@ export class LoginComponent implements OnInit {
         },
         error: (error) => {
           console.error('Login failed', error);
-          this.toastService.show(error.error?.message || 'Login failed. Please check your credentials.', 'error');
+          // Backend returns { message: "..." }
+          const msg = error.error?.message || 'Login failed. Please check your credentials.';
+          this.errorMessage = msg;
+          this.toastService.show(msg, 'error');
         }
       });
     } else {
