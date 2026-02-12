@@ -42,6 +42,23 @@ export class SentFilesComponent implements OnInit {
     });
   }
 
+  downloadEncrypted(fileId: number, fileName: string) {
+    this.apiService.downloadEncryptedFile(fileId).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `ENCRYPTED_${fileName}`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+        this.toastService.show('Encrypted file downloaded!', 'success');
+      },
+      error: () => this.toastService.show('Failed to download encrypted file', 'error')
+    });
+  }
+
   formatDate(dateString: string): string {
     const date = new Date(dateString);
     return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();

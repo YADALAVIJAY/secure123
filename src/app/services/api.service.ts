@@ -36,6 +36,12 @@ export class ApiService {
     );
   }
 
+  downloadEncryptedFile(id: number): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/download-encrypted/${id}`,
+      { headers: this.getHeaders(), responseType: 'blob' }
+    );
+  }
+
   getInbox(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/inbox`, { headers: this.getHeaders() });
   }
