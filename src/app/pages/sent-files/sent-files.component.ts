@@ -48,7 +48,8 @@ export class SentFilesComponent implements OnInit {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `ENCRYPTED_${fileName}`;
+        // Append .txt so it opens in text editor to show encryption
+        a.download = `ENCRYPTED_${fileName}.txt`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
