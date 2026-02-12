@@ -144,8 +144,7 @@ export class ReceivedFilesComponent implements OnInit {
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    // Append .txt so it opens in text editor to show encryption
-    a.download = `ENCRYPTED_${filename}.txt`;
+    a.download = filename;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
