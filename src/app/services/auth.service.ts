@@ -8,7 +8,7 @@ import { tap } from 'rxjs/operators';
 })
 export class AuthService {
 
-  private apiUrl = 'https://secure-kitv.onrender.com/api/auth';
+  private apiUrl = 'http://localhost:8088/api/auth';
 
   constructor(private http: HttpClient) { }
 

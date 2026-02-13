@@ -8,7 +8,7 @@ import { AuthService } from './auth.service';
 })
 export class ApiService {
 
-  private apiUrl = 'https://secure-kitv.onrender.com/api/files';
+  private apiUrl = 'http://localhost:8088/api/files';
 
   constructor(private http: HttpClient, private authService: AuthService) { }
 
@@ -52,10 +52,10 @@ export class ApiService {
 
   getUserProfile(): Observable<any> {
     // Note: Profile endpoint is in AuthController, so we use authUrl base
-    return this.http.get('https://secure-kitv.onrender.com/api/auth/profile', { headers: this.getHeaders() });
+    return this.http.get('http://localhost:8088/api/auth/profile', { headers: this.getHeaders() });
   }
 
   verifyPassword(password: string): Observable<any> {
-    return this.http.post('https://secure-kitv.onrender.com/api/auth/verify-password', { password }, { headers: this.getHeaders() });
+    return this.http.post('http://localhost:8088/api/auth/verify-password', { password }, { headers: this.getHeaders() });
   }
 }
