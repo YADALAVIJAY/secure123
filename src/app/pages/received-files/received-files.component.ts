@@ -1,6 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { ApiService } from '../../services/api.service';
 import { ToastService } from '../../services/toast.service';
+import { CryptoService } from '../../services/crypto.service';
+import { AuthService } from '../../services/auth.service';
+import { lastValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-received-files',
@@ -18,8 +21,8 @@ export class ReceivedFilesComponent implements OnInit {
   currentFileName = '';
 
   viewEncrypted(fileId: number, fileName: string) {
-    this.apiService.downloadEncryptedFile(fileId).subscribe({
-      next: (blob) => {
+    this.apiService.downloadFile(fileId).subscribe({
+      next: (blob: Blob) => {
         const reader = new FileReader();
         reader.onload = () => {
           // Get the first 5000 characters to avoid freezing browser if file is huge
@@ -46,7 +49,9 @@ export class ReceivedFilesComponent implements OnInit {
 
   constructor(
     private apiService: ApiService,
-    private toastService: ToastService
+    private toastService: ToastService,
+    private cryptoService: CryptoService,
+    private authService: AuthService
   ) { }
 
   ngOnInit(): void {
@@ -76,60 +81,67 @@ export class ReceivedFilesComponent implements OnInit {
   }
 
   downloadFile(fileId: number, fileName: string) {
-    // Show private key modal instead of downloading directly
-    this.selectedFileId = fileId;
-    this.selectedFileName = fileName;
-    this.showPrivateKeyModal = true;
+    const cachedKey = this.authService.getPrivateKey();
+    if (cachedKey) {
+      this.selectedFileId = fileId;
+      this.selectedFileName = fileName;
+      this.processDownload(fileId, cachedKey);
+    } else {
+      // Show private key modal if key not in local storage
+      this.selectedFileId = fileId;
+      this.selectedFileName = fileName;
+      this.showPrivateKeyModal = true;
+    }
   }
 
   onPrivateKeyProvided(privateKey: string) {
     if (!this.selectedFileId) return;
-
-    this.downloadingFileId = this.selectedFileId;
     this.showPrivateKeyModal = false;
+    this.processDownload(this.selectedFileId, privateKey);
+  }
 
-    this.toastService.show('Validating private key...', 'info');
+  processDownload(fileId: number, privateKey: string) {
+    this.downloadingFileId = fileId;
+    const fileData = this.receivedFiles.find(f => f.id === fileId);
 
-    setTimeout(() => {
-      this.toastService.show('Decrypting AES key with RSA-2048...', 'info');
-    }, 800);
+    if (!fileData) {
+      this.toastService.show('Error: File metadata not found.', 'error');
+      this.downloadingFileId = null;
+      return;
+    }
 
-    setTimeout(() => {
-      this.toastService.show('Decrypting file content...', 'info');
-    }, 1600);
+    this.toastService.show('Downloading Encrypted Blob...', 'info');
 
-    setTimeout(() => {
-      this.toastService.show('Verifying SHA-256 digital signature...', 'info');
-    }, 2400);
+    this.apiService.downloadFile(fileId).subscribe({
+      next: async (encryptedBlob: Blob) => {
+        try {
+          // 1. Decrypt AES Key (Using Receiver's RSA Private Key)
+          this.toastService.show('Decrypting Session Key...', 'info');
+          const aesKey = this.cryptoService.decryptAESKey(fileData.encryptedAesKey, privateKey);
 
-    // Pass the private key to the API for validation and decryption
-    this.apiService.downloadFile(this.selectedFileId!, privateKey).subscribe({
-      next: (blob) => {
-        setTimeout(() => {
-          this.toastService.show('✓ Signature Verified! File is authentic.', 'success');
-          this.downloadBlob(blob, this.selectedFileName);
+          // 2. Decrypt File Content (Using Decrypted AES Key)
+          this.toastService.show('Decrypting File Content...', 'info');
+          const encryptedBuffer = await this.cryptoService.blobToArrayBuffer(encryptedBlob);
+          const decryptedBuffer = this.cryptoService.decryptFile(this.cryptoService.arrayBufferToBinaryString(encryptedBuffer), aesKey);
+
+          // 3. Download
+          this.toastService.show('File Decrypted Successfully!', 'success');
+          const decryptedBlob = new Blob([decryptedBuffer]);
+          this.downloadBlob(decryptedBlob, this.selectedFileName);
+
+        } catch (error: any) {
+          console.error('Decryption failed', error);
+          this.toastService.show('Decryption/Verification Failed: ' + error.message, 'error');
+        } finally {
           this.downloadingFileId = null;
           this.selectedFileId = null;
           this.selectedFileName = '';
-        }, 3200);
+        }
       },
       error: (error) => {
         console.error('Download failed', error);
-        let errorMessage = '✗ Decryption Failed!';
-
-        if (error.status === 403) {
-          errorMessage = '✗ Invalid Private Key! You are using a fake key.';
-        } else if (error.status === 400) {
-          errorMessage = '✗ Decryption Failed! Invalid private key or corrupted file.';
-        } else if (error.status === 429) {
-          // Use the message from the backend which contains the time remaining
-          errorMessage = error.error?.message || '⛔ You are blocked! Too many failed attempts.';
-        }
-
-        this.toastService.show(errorMessage, 'error');
+        this.toastService.show('Download failed: ' + error.message, 'error');
         this.downloadingFileId = null;
-        this.selectedFileId = null;
-        this.selectedFileName = '';
       }
     });
   }
@@ -154,6 +166,163 @@ export class ReceivedFilesComponent implements OnInit {
   formatDate(dateString: string): string {
     const date = new Date(dateString);
     return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+  }
+
+  // Manual Decryption Modal State
+  showDecryptModal = false;
+  manualPrivateKey = '';
+  manualAesKey = ''; // The decrypted key shown to user
+  inputAesKey = '';  // The key user pastes back in
+  decryptedAesKeyResult = '';
+
+  openDecryptModal(file: any) {
+    this.selectedFileId = file.id;
+    this.selectedFileName = file.fileName;
+    // Do NOT auto-fill private key as per user request. User must enter it manually.
+    this.manualPrivateKey = '';
+    this.decryptedAesKeyResult = '';
+    this.inputAesKey = '';
+    this.showDecryptModal = true;
+  }
+
+  closeDecryptModal() {
+    this.showDecryptModal = false;
+    this.manualPrivateKey = '';
+    this.decryptedAesKeyResult = '';
+    this.inputAesKey = '';
+  }
+
+  // Processing Modal State
+  isProcessing = false;
+  isSuccess = false;
+  processStatus = '';
+
+  decryptKeyManually() {
+    if (!this.selectedFileId || !this.manualPrivateKey) return;
+
+    this.isProcessing = true;
+    this.isSuccess = false;
+    this.processStatus = 'Decrypting AES Session Key...';
+
+    // Small delay to show processing state
+    setTimeout(() => {
+      const fileData = this.receivedFiles.find(f => f.id === this.selectedFileId);
+      if (!fileData) {
+        this.isProcessing = false;
+        return;
+      }
+
+      try {
+        const decryptedBinary = this.cryptoService.decryptAESKey(fileData.encryptedAesKey, this.manualPrivateKey);
+        // Convert binary string to Hex for safe display
+        this.decryptedAesKeyResult = this.cryptoService.bytesToHex(decryptedBinary);
+
+        this.processStatus = 'Key Unlocked Successfully!';
+        this.isSuccess = true;
+
+        setTimeout(() => {
+          this.isProcessing = false;
+          this.isSuccess = false;
+          // Toast removed as per request, result is visible in the modal
+        }, 1500);
+
+      } catch (e: any) {
+        this.isProcessing = false;
+        this.toastService.show('Key Decryption Failed: ' + e.message, 'error');
+      }
+    }, 1000);
+  }
+
+  copyToClipboard(text: string) {
+    navigator.clipboard.writeText(text).then(() => {
+      // User requested no alert message on copy
+      // this.toastService.show('Key copied to clipboard', 'success');
+    });
+  }
+
+  downloadWithManualKey() {
+    if (!this.selectedFileId || !this.inputAesKey) {
+      this.toastService.show('Please enter the AES Key first', 'error');
+      return;
+    }
+
+    this.downloadingFileId = this.selectedFileId;
+    this.isProcessing = true;
+    this.isSuccess = false;
+    this.processStatus = 'Initiating Secure Download...';
+
+    // Close decrypt modal to show processing modal
+    this.showDecryptModal = false;
+
+    // Retrieve fileData for signature verification
+    const fileData = this.receivedFiles.find(f => f.id === this.selectedFileId)!;
+
+    this.apiService.downloadFile(this.selectedFileId).subscribe({
+      next: async (encryptedBlob: Blob) => {
+        try {
+          // Decrypt File Content (Using MAnual AES Key)
+          // Input key is Hex, convert back to binary for decryption
+          const binaryAesKey = this.cryptoService.hexToBytes(this.inputAesKey);
+
+          this.processStatus = 'Decrypting File Content...';
+          // delay for UI
+          await new Promise(r => setTimeout(r, 500));
+
+          const encryptedBuffer = await this.cryptoService.blobToArrayBuffer(encryptedBlob);
+          const decryptedBuffer = this.cryptoService.decryptFile(this.cryptoService.arrayBufferToBinaryString(encryptedBuffer), binaryAesKey);
+
+          // Verify Signature
+          if (fileData.signature && fileData.signature !== 'UNSIGNED') {
+            this.processStatus = 'Verifying Digital Signature...';
+            await new Promise(r => setTimeout(r, 500));
+
+            // We need sender public key. Ideally valid, but for now fetch it or if we have it.
+            // For simplicity in this manual flow, we fetch it now.
+            const senderKeyData = await lastValueFrom(this.apiService.getPublicKey(fileData.senderUsername));
+            const isValid = this.cryptoService.verifySignature(decryptedBuffer, fileData.signature, senderKeyData.publicKey);
+
+            if (isValid) {
+              // Verified silently or update status
+              this.processStatus = 'Signature Verified!';
+              await new Promise(r => setTimeout(r, 500));
+            } else {
+              this.toastService.show('⚠ Signature Verification FAILED! Be Connected.', 'error');
+              // We continue download but warn user
+            }
+          }
+
+          // Download
+          this.processStatus = 'Download Complete!';
+          this.isSuccess = true;
+
+          await new Promise(r => setTimeout(r, 1500)); // Show success tick
+
+          const decryptedBlob = new Blob([decryptedBuffer]);
+          this.downloadBlob(decryptedBlob, this.selectedFileName);
+
+          this.isProcessing = false;
+          this.isSuccess = false;
+          this.closeDecryptModal();
+
+        } catch (error: any) {
+          console.error('Decryption failed', error);
+          this.toastService.show('Decryption Failed: ' + error.message, 'error');
+          this.isProcessing = false;
+          this.isSuccess = false;
+          // Re-open decrypt modal so they can try again if they want
+          this.showDecryptModal = true;
+        } finally {
+          this.downloadingFileId = null;
+        }
+      },
+      error: (error) => {
+        console.error('Download failed', error);
+        this.toastService.show('Download failed: ' + error.message, 'error');
+        this.downloadingFileId = null;
+        this.isProcessing = false;
+        this.showDecryptModal = true;
+      }
+    });
   }
 
   isDownloading(fileId: number): boolean {

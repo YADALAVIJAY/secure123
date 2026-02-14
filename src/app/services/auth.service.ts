@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { tap } from 'rxjs/operators';
+import { tap, switchMap } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -22,6 +22,19 @@ export class AuthService {
         if (response && response.token) {
           this.saveToken(response.token);
           this.saveUsername(response.username);
+        }
+      }),
+      switchMap(() => this.http.get(`${this.apiUrl}/profile`, {
+        headers: { 'Authorization': `Bearer ${this.getToken()}` }
+      })),
+      tap((profile: any) => {
+        // Backend sends the decrypted key in the 'encryptedPrivateKey' field of the DTO
+        // We handle this mismatch here.
+        if (profile && profile.encryptedPrivateKey) {
+          this.savePrivateKey(profile.encryptedPrivateKey);
+        } else if (profile && profile.plaintextPrivateKey) {
+          // Fallback in case backend is updated
+          this.savePrivateKey(profile.plaintextPrivateKey);
         }
       })
     );
@@ -46,6 +59,14 @@ export class AuthService {
   logout(): void {
     localStorage.removeItem('token');
     localStorage.removeItem('username');
+  }
+
+  savePrivateKey(key: string): void {
+    localStorage.setItem('privateKey', key);
+  }
+
+  getPrivateKey(): string | null {
+    return localStorage.getItem('privateKey');
   }
 
   isLoggedIn(): boolean {

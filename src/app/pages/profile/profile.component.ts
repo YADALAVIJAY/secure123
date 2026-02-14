@@ -73,13 +73,18 @@ export class ProfileComponent implements OnInit {
   // Password Modal Logic
   showPasswordModal: boolean = false;
   passwordInput: string = '';
-  pendingAction: 'show' | 'download' | null = null;
+  pendingAction: 'show' | 'download' | 'copy' | null = null;
   verifyLoading: boolean = false;
 
   closePasswordModal() {
     this.showPasswordModal = false;
     this.passwordInput = '';
     this.pendingAction = null;
+  }
+
+  copyPrivateKey() {
+    this.pendingAction = 'copy';
+    this.showPasswordModal = true;
   }
 
   verifyPassword() {
@@ -89,12 +94,15 @@ export class ProfileComponent implements OnInit {
     this.apiService.verifyPassword(this.passwordInput).subscribe({
       next: () => {
         this.verifyLoading = false;
-        this.toastService.show('Password verified!', 'success');
+        // Removed intermediate toast to avoid double alerts
+
 
         if (this.pendingAction === 'show') {
           this.showPrivateKey = true;
         } else if (this.pendingAction === 'download') {
           this.performDownload();
+        } else if (this.pendingAction === 'copy') {
+          this.performCopyPrivateKey();
         }
 
         this.closePasswordModal();
@@ -105,6 +113,14 @@ export class ProfileComponent implements OnInit {
         const msg = error.error?.message || 'Invalid credentials';
         this.toastService.show(msg, 'error');
       }
+    });
+  }
+
+  performCopyPrivateKey() {
+    navigator.clipboard.writeText(this.privateKey).then(() => {
+      this.toastService.show('Private key copied to clipboard!', 'success');
+    }).catch(() => {
+      this.toastService.show('Failed to copy private key', 'error');
     });
   }
 

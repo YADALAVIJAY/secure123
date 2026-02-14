@@ -19,27 +19,25 @@ export class ApiService {
     });
   }
 
-  uploadFile(file: File, receiverUsername: string): Observable<any> {
+  getPublicKey(username: string): Observable<any> {
+    return this.http.get(`http://localhost:8088/api/users/${username}/public-key`, { headers: this.getHeaders() });
+  }
+
+  uploadFile(file: Blob, filename: string, receiverUsername: string, encryptedAesKey: string, signature: string): Observable<any> {
     const formData = new FormData();
-    formData.append('file', file);
+    formData.append('file', file, filename);
     formData.append('receiverUsername', receiverUsername);
+    formData.append('encryptedAesKey', encryptedAesKey);
+    formData.append('signature', signature);
 
-    const headers = this.getHeaders();
-    // Do NOT manually set Content-Type for FormData, Angular handles it
-    return this.http.post(`${this.apiUrl}/upload`, formData, { headers: headers });
+    return this.http.post(`${this.apiUrl}/upload`, formData, { headers: this.getHeaders() });
   }
 
-  downloadFile(id: number, privateKey: string): Observable<Blob> {
-    return this.http.post(`${this.apiUrl}/download/${id}`,
-      { privateKey: privateKey },
-      { headers: this.getHeaders(), responseType: 'blob' }
-    );
-  }
-
-  downloadEncryptedFile(id: number): Observable<Blob> {
-    return this.http.get(`${this.apiUrl}/download-encrypted/${id}`,
-      { headers: this.getHeaders(), responseType: 'blob' }
-    );
+  downloadFile(id: number): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/download/${id}`, {
+      headers: this.getHeaders(),
+      responseType: 'blob'
+    });
   }
 
   getInbox(): Observable<any[]> {
@@ -51,7 +49,6 @@ export class ApiService {
   }
 
   getUserProfile(): Observable<any> {
-    // Note: Profile endpoint is in AuthController, so we use authUrl base
     return this.http.get('http://localhost:8088/api/auth/profile', { headers: this.getHeaders() });
   }
 

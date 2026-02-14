@@ -34,31 +34,19 @@ export class ReceiveComponent implements OnInit {
 
       const privateKey = this.decryptForm.get('password')?.value || '';
 
-      this.apiService.downloadFile(fileId, privateKey).subscribe({
-        next: (blob) => {
-          // Simulate the security steps visualization
-          setTimeout(() => this.toastService.show('Decrypting with RSA-2048 private key...', 'info'), 800);
-          setTimeout(() => this.toastService.show('Verifying SHA-256 digital signature...', 'info'), 1600);
+      this.apiService.downloadFile(fileId).subscribe({
+        next: (blob: Blob) => {
+          this.toastService.show('Downloading Encrypted File...', 'info');
 
           setTimeout(() => {
-            this.toastService.show('Success! Integrity verified.', 'success');
-            this.downloadBlob(blob, `secure_file_${fileId}`);
+            this.toastService.show('File downloaded (Encrypted). Decryption requires using "Received Files" page.', 'info');
+            this.downloadBlob(blob, `encrypted_file_${fileId}`);
             this.isProcessing = false;
-          }, 2400);
+          }, 1000);
         },
         error: (error) => {
           console.error('Download failed', error);
-          let errorMessage = 'Decryption failed. ';
-
-          if (error.status === 403) {
-            errorMessage += 'Invalid private key provided.';
-          } else if (error.status === 404) {
-            errorMessage += 'File not found.';
-          } else {
-            errorMessage += 'Integrity check failed or unauthorized.';
-          }
-
-          this.toastService.show(errorMessage, 'error');
+          this.toastService.show('Download failed. File not found or access denied.', 'error');
           this.isProcessing = false;
         }
       });

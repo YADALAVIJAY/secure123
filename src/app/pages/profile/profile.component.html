@@ -46,7 +46,10 @@
                                 [class.fa-eye-slash]="showPrivateKey"></i>
                             {{ showPrivateKey ? 'Hide' : 'Show' }}
                         </button>
-                        <!-- Copy button removed as requested -->
+                        <button class="btn-copy" (click)="copyPrivateKey()">
+                            <i class="fa-solid fa-copy"></i>
+                            Copy
+                        </button>
                         <button class="btn-download" (click)="downloadPrivateKey()">
                             <i class="fa-solid fa-download"></i>
                             Download

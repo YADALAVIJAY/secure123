@@ -48,8 +48,8 @@ export class SentFilesComponent implements OnInit {
   currentFileName = '';
 
   viewEncrypted(fileId: number, fileName: string) {
-    this.apiService.downloadEncryptedFile(fileId).subscribe({
-      next: (blob) => {
+    this.apiService.downloadFile(fileId).subscribe({
+      next: (blob: Blob) => {
         const reader = new FileReader();
         reader.onload = () => {
           const text = reader.result as string;
