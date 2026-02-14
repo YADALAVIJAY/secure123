@@ -58,29 +58,10 @@ export class HomeComponent {
         const receiverPublicKey = data.publicKey;
 
         try {
-          // 2. Read File
+          // 2. Read File for Signing (Client-Side)
           const fileBuffer = await this.cryptoService.blobToArrayBuffer(this.selectedFile!);
 
-          // 3. Generate AES Key
-          this.uploadStatus = 'Generating Session Key...';
-          const aesKey = this.cryptoService.generateAESKey();
-
-          // 4. Encrypt File (AES)
-          this.uploadStatus = 'Encrypting File (AES-256)...';
-          // Small delay to let UI update (optional, but good for UX)
-          await new Promise(r => setTimeout(r, 500));
-
-          const encryptedFileStr = this.cryptoService.encryptFile(fileBuffer, aesKey);
-          // Convert back to Blob for upload
-          const encryptedBlob = new Blob([this.cryptoService.binaryStringToArrayBuffer(encryptedFileStr)]);
-
-          // 5. Encrypt AES Key (RSA)
-          this.uploadStatus = 'Encrypting Key (RSA)...';
-          await new Promise(r => setTimeout(r, 300));
-          const encryptedAesKey = this.cryptoService.encryptAESKey(aesKey, receiverPublicKey);
-
-
-          // 6. Digital Signature
+          // 3. Digital Signature (Client-Side Authenticity)
           this.uploadStatus = 'Signing Data (Digital Signature)...';
           await new Promise(r => setTimeout(r, 300));
 
@@ -88,12 +69,12 @@ export class HomeComponent {
           if (!senderPrivateKey) throw new Error("Private Key not found. Please re-login.");
           const signature = this.cryptoService.signData(fileBuffer, senderPrivateKey);
 
-          // 7. Upload
-          this.uploadStatus = 'Uploading Encrypted Data...';
-          this.apiService.uploadFile(encryptedBlob, this.selectedFile!.name, receiver, encryptedAesKey, signature)
+          // 4. Upload Plaintext File (For Server-Side Scanning & Encryption)
+          this.uploadStatus = 'Uploading File for Secure Scanning...';
+          this.apiService.uploadFile(this.selectedFile!, this.selectedFile!.name, receiver, signature)
             .subscribe({
               next: (response) => {
-                this.uploadStatus = 'File Uploaded Successfully!';
+                this.uploadStatus = 'File Scanned & Encrypted Successfully!';
                 this.isSuccess = true; // Trigger success state
 
                 // Keep success message for a bit before closing
@@ -105,7 +86,14 @@ export class HomeComponent {
               },
               error: (error) => {
                 console.error('Upload failed', error);
-                this.toastService.show('Upload failed: ' + (error.error?.message || error.message), 'error');
+                const errorMessage = error.error?.message || error.message;
+
+                if (errorMessage && (errorMessage.includes('Malware') || errorMessage.includes('Security Alert'))) {
+                  this.toastService.show('⚠️ DANGER: Malicious File Detected! Upload Blocked.', 'error');
+                } else {
+                  this.toastService.show('Upload failed: ' + errorMessage, 'error');
+                }
+
                 this.isUploading = false;
                 this.selectedFile = null;
               }

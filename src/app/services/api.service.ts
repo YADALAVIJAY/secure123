@@ -23,11 +23,10 @@ export class ApiService {
     return this.http.get(`http://localhost:8088/api/users/${username}/public-key`, { headers: this.getHeaders() });
   }
 
-  uploadFile(file: Blob, filename: string, receiverUsername: string, encryptedAesKey: string, signature: string): Observable<any> {
+  uploadFile(file: Blob, filename: string, receiverUsername: string, signature: string): Observable<any> {
     const formData = new FormData();
     formData.append('file', file, filename);
     formData.append('receiverUsername', receiverUsername);
-    formData.append('encryptedAesKey', encryptedAesKey);
     formData.append('signature', signature);
 
     return this.http.post(`${this.apiUrl}/upload`, formData, { headers: this.getHeaders() });
