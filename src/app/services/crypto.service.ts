@@ -87,8 +87,15 @@ export class CryptoService {
             const pem = this.ensurePem(receiverPrivateKey, 'PRIVATE');
             const privateKey = forge.pki.privateKeyFromPem(pem);
             const encryptedBytes = forge.util.decode64(encryptedAesKeyBase64);
-            const decrypted = privateKey.decrypt(encryptedBytes, 'RSA-OAEP');
-            return decrypted;
+
+            try {
+                // Try OAEP first (New backend standard)
+                return privateKey.decrypt(encryptedBytes, 'RSA-OAEP');
+            } catch (oaepError) {
+                console.warn('OAEP Decryption failed, attempting PKCS1 fallback...', oaepError);
+                // Fallback to PKCS1 (Old backend standard / Legacy files)
+                return privateKey.decrypt(encryptedBytes, 'RSAES-PKCS1-V1_5');
+            }
         } catch (e) {
             console.error("AES Key Decryption Failed", e);
             throw e;
