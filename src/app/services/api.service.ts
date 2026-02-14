@@ -2,13 +2,14 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { AuthService } from './auth.service';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ApiService {
 
-  private apiUrl = 'http://localhost:8088/api/files';
+  private apiUrl = `${environment.apiUrl}/files`;
 
   constructor(private http: HttpClient, private authService: AuthService) { }
 
@@ -20,7 +21,7 @@ export class ApiService {
   }
 
   getPublicKey(username: string): Observable<any> {
-    return this.http.get(`http://localhost:8088/api/users/${username}/public-key`, { headers: this.getHeaders() });
+    return this.http.get(`${environment.apiUrl}/users/${username}/public-key`, { headers: this.getHeaders() });
   }
 
   uploadFile(file: Blob, filename: string, receiverUsername: string, signature: string): Observable<any> {
@@ -48,10 +49,10 @@ export class ApiService {
   }
 
   getUserProfile(): Observable<any> {
-    return this.http.get('http://localhost:8088/api/auth/profile', { headers: this.getHeaders() });
+    return this.http.get(`${environment.apiUrl}/auth/profile`, { headers: this.getHeaders() });
   }
 
   verifyPassword(password: string): Observable<any> {
-    return this.http.post('http://localhost:8088/api/auth/verify-password', { password }, { headers: this.getHeaders() });
+    return this.http.post(`${environment.apiUrl}/auth/verify-password`, { password }, { headers: this.getHeaders() });
   }
 }
