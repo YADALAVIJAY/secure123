@@ -47,19 +47,70 @@ export class CryptoService {
      * Output: ArrayBuffer
      */
     decryptFile(encryptedDataWithIv: string, aesKey: string): ArrayBuffer {
-        const iv = encryptedDataWithIv.slice(0, 16);
-        const encrypted = encryptedDataWithIv.slice(16);
-
-        const decipher = forge.cipher.createDecipher('AES-CBC', aesKey);
-        decipher.start({ iv: iv });
-        decipher.update(forge.util.createBuffer(encrypted));
-        const result = decipher.finish();
-
-        if (!result) {
-            throw new Error('Decryption failed');
+        // Defensive Checks
+        if (!aesKey || typeof aesKey !== 'string') {
+            console.error('Invalid AES Key Type:', typeof aesKey);
+            throw new Error('Invalid AES Key provided for decryption (Not a string)');
+        }
+        if (aesKey.length !== 32) {
+            console.error('Invalid AES Key Length:', aesKey.length);
+            throw new Error(`Invalid AES Key length: ${aesKey.length} bytes. Expected 32 bytes (256-bit).`);
+        }
+        if (!encryptedDataWithIv || typeof encryptedDataWithIv !== 'string') {
+            console.error('Invalid Encrypted Data Type:', typeof encryptedDataWithIv);
+            throw new Error('Invalid Encrypted Data (Not a string)');
+        }
+        // Minimal length for ANY AES block is 16 bytes
+        if (encryptedDataWithIv.length < 1) {
+            throw new Error('Encrypted file data is empty');
         }
 
-        return this.binaryStringToArrayBuffer(decipher.output.getBytes());
+        try {
+            // STRATEGY 1: Try AES-CBC (New Backend Standard)
+            // Expects: 16 bytes IV + Encrypted Content
+            if (encryptedDataWithIv.length >= 32) { // 16 bytes IV + at least 16 bytes block
+                try {
+                    console.log('Attempting AES-CBC Decryption...');
+                    const iv = encryptedDataWithIv.slice(0, 16);
+                    const encrypted = encryptedDataWithIv.slice(16);
+
+                    const decipher = forge.cipher.createDecipher('AES-CBC', aesKey);
+                    decipher.start({ iv: iv });
+                    decipher.update(forge.util.createBuffer(encrypted));
+                    const result = decipher.finish();
+
+                    if (result) {
+                        console.log('AES-CBC Decryption successful.');
+                        return this.binaryStringToArrayBuffer(decipher.output.getBytes());
+                    } else {
+                        throw new Error('CBC padding check failed');
+                    }
+                } catch (cbcError) {
+                    console.warn('AES-CBC failed (likely legacy file), attempting Fallback to AES-ECB...', cbcError);
+                }
+            } else {
+                console.warn('File too short for CBC (needs IV), attempting AES-ECB...');
+            }
+
+            // STRATEGY 2: Fallback to AES-ECB (Old Backend Standard)
+            // Expects: Raw Encrypted Content (No IV)
+            console.log('Attempting AES-ECB Decryption (Legacy Fallback)...');
+            const decipher = forge.cipher.createDecipher('AES-ECB', aesKey);
+            decipher.start();
+            decipher.update(forge.util.createBuffer(encryptedDataWithIv));
+            const result = decipher.finish();
+
+            if (!result) {
+                throw new Error('AES-ECB Decryption failed (Padding Error). Key is wrong or file is corrupted.');
+            }
+
+            console.log('AES-ECB Decryption successful.');
+            return this.binaryStringToArrayBuffer(decipher.output.getBytes());
+
+        } catch (e: any) {
+            console.error('All Decryption Attempts Failed:', e);
+            throw new Error('Decryption Failed: ' + e.message);
+        }
     }
 
     // -------------------------
@@ -90,11 +141,44 @@ export class CryptoService {
 
             try {
                 // Try OAEP first (New backend standard)
-                return privateKey.decrypt(encryptedBytes, 'RSA-OAEP');
+                let decrypted = privateKey.decrypt(encryptedBytes, 'RSA-OAEP');
+
+                // BACKEND QUIRK FIX:
+                // The backend encrypts the Base64 String of the key (44 bytes), not the raw 32 bytes.
+                // If we get 44 bytes, it's likely the Base64 string. Decode it.
+                if (decrypted.length === 44) {
+                    console.log('Detected Base64 encoded AES key (44 bytes). Decoding...');
+                    try {
+                        const decoded = forge.util.decode64(decrypted);
+                        if (decoded.length === 32) {
+                            console.log('Successfully decoded to 32-byte AES Key.');
+                            return decoded;
+                        }
+                    } catch (ignore) {
+                        console.warn('Failed to decode potential Base64 key, using raw.');
+                    }
+                }
+                return decrypted;
+
             } catch (oaepError) {
                 console.warn('OAEP Decryption failed, attempting PKCS1 fallback...', oaepError);
                 // Fallback to PKCS1 (Old backend standard / Legacy files)
-                return privateKey.decrypt(encryptedBytes, 'RSAES-PKCS1-V1_5');
+                let decrypted = privateKey.decrypt(encryptedBytes, 'RSAES-PKCS1-V1_5');
+
+                // SAME FIX FOR LEGACY/PKCS1:
+                if (decrypted.length === 44) {
+                    console.log('Detected Base64 encoded AES key (Legacy 44 bytes). Decoding...');
+                    try {
+                        const decoded = forge.util.decode64(decrypted);
+                        if (decoded.length === 32) {
+                            console.log('Successfully decoded to 32-byte AES Key.');
+                            return decoded;
+                        }
+                    } catch (ignore) {
+                        console.warn('Failed to decode potential Base64 key, using raw.');
+                    }
+                }
+                return decrypted;
             }
         } catch (e) {
             console.error("AES Key Decryption Failed", e);
@@ -131,6 +215,8 @@ export class CryptoService {
             const fileStr = this.arrayBufferToBinaryString(fileContent);
             md.update(fileStr, 'raw');
 
+            console.log('Signing Data Hash (SHA-256):', md.digest().toHex()); // Debug Log
+
             const pem = this.ensurePem(senderPrivateKey, 'PRIVATE');
             const privateKey = forge.pki.privateKeyFromPem(pem);
             const signature = privateKey.sign(md);
@@ -151,14 +237,21 @@ export class CryptoService {
             const fileStr = this.arrayBufferToBinaryString(fileContent);
             md.update(fileStr, 'raw');
 
+            const digestBytes = md.digest().bytes();
+            const digestHex = forge.util.bytesToHex(digestBytes);
+
+            console.log('Verifying Data Hash (SHA-256):', digestHex); // Debug Log
+
             const signature = forge.util.decode64(signatureBase64);
             const pem = this.ensurePem(senderPublicKey, 'PUBLIC');
             const publicKey = forge.pki.publicKeyFromPem(pem);
 
-            return publicKey.verify(md.digest().bytes(), signature);
-        } catch (e) {
+            const verified = publicKey.verify(digestBytes, signature);
+            console.log('Signature Verification Result:', verified);
+            return verified;
+        } catch (e: any) {
             console.error("Verification Failed", e);
-            return false;
+            throw new Error('Signature Verification crashed: ' + e.message);
         }
     }
 

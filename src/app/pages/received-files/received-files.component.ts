@@ -262,7 +262,30 @@ export class ReceivedFilesComponent implements OnInit {
         try {
           // Decrypt File Content (Using MAnual AES Key)
           // Input key is Hex, convert back to binary for decryption
-          const binaryAesKey = this.cryptoService.hexToBytes(this.inputAesKey);
+          const trimmedKey = this.inputAesKey.trim();
+          console.log('Processing Key:', trimmedKey);
+
+          if (!trimmedKey) {
+            throw new Error('AES Key is empty');
+          }
+
+          // User Error Detection:
+          if (trimmedKey.includes('-----BEGIN')) {
+            throw new Error('You pasted your PRIVATE KEY! Please paste the DEC_SESSION_KEY (Hex) from Step 1.');
+          }
+          if (trimmedKey.length > 100) {
+            throw new Error('Key is too long! You likely pasted the encrypted file or private key. Please paste the 64-character Hex Session Key.');
+          }
+          if (trimmedKey.length !== 64) {
+            // Try to be helpful: is it Base64? (44 chars)
+            if (trimmedKey.length === 44 && trimmedKey.endsWith('=')) {
+              throw new Error('You pasted a Base64 Key. Please use the Hex Key shown in the previous step.');
+            }
+            throw new Error(`Invalid Key Length: ${trimmedKey.length}. Expected 64 characters (Hex).`);
+          }
+
+          const binaryAesKey = this.cryptoService.hexToBytes(trimmedKey);
+          console.log('Binary Key Length:', binaryAesKey.length);
 
           this.processStatus = 'Decrypting File Content...';
           // delay for UI
@@ -286,7 +309,8 @@ export class ReceivedFilesComponent implements OnInit {
               this.processStatus = 'Signature Verified!';
               await new Promise(r => setTimeout(r, 500));
             } else {
-              this.toastService.show('⚠ Signature Verification FAILED! Be Connected.', 'error');
+              this.toastService.show('⚠️ Signature Mismatch! The file might have been modified.', 'error');
+              console.warn('Signature Verification Failed. Check console logs for hash mismatch.');
               // We continue download but warn user
             }
           }
