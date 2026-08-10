@@ -1,42 +1,51 @@
-<div class="sent-files-container">
-    <div class="page-header glass-panel">
-        <h1><i class="fa-solid fa-paper-plane"></i> Sent Files</h1>
-        <p class="subtitle">Files you've securely shared with others</p>
-    </div>
+<div class="files-page">
+  <div class="page-header">
+    <h1>Dispatched Transfers</h1>
+    <p class="page-subtitle">Log of encrypted payloads dispatched to verified recipients.</p>
+  </div>
 
-    <div class="files-grid" *ngIf="!isLoading && sentFiles.length > 0">
-        <div class="file-card glass-panel" *ngFor="let file of sentFiles">
-            <div class="file-icon">
-                <i class="fa-solid fa-file-shield"></i>
-            </div>
-            <div class="file-info">
-                <h3 class="file-name">{{ file.fileName }}</h3>
-                <div class="file-meta">
-                    <span class="meta-item">
-                        <i class="fa-solid fa-user"></i>
-                        To: {{ file.receiverUsername }}
-                    </span>
-                    <span class="meta-item">
-                        <i class="fa-solid fa-clock"></i>
-                        {{ formatDate(file.createdAt) }}
-                    </span>
-                </div>
-                <div class="security-badges">
-                    <span class="badge encrypted"><i class="fa-solid fa-lock"></i> AES-256</span>
-                    <span class="badge signed"><i class="fa-solid fa-signature"></i> Signed</span>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="empty-state" *ngIf="!isLoading && sentFiles.length === 0">
-        <i class="fa-solid fa-inbox"></i>
-        <h2>No sent files yet</h2>
-        <p>Files you upload will appear here</p>
+  <div class="files-panel saas-card">
+    <div class="panel-header">
+      <h2>Sent Payloads</h2>
+      <span class="saas-badge badge-neutral">{{ sentFiles.length }} Total</span>
     </div>
 
     <div class="loading-state" *ngIf="isLoading">
-        <div class="spinner"></div>
-        <p>Loading sent files...</p>
+      <i class="fa-solid fa-circle-notch fa-spin text-sky"></i> Loading transfer logs...
     </div>
+
+    <div class="empty-state" *ngIf="!isLoading && sentFiles.length === 0">
+      <i class="fa-solid fa-paper-plane text-muted"></i> No dispatched files found.
+    </div>
+
+    <div class="table-container" *ngIf="!isLoading && sentFiles.length > 0">
+      <table class="saas-table">
+        <thead>
+          <tr>
+            <th>File Name</th>
+            <th>Recipient</th>
+            <th>Size</th>
+            <th>Sent Date</th>
+            <th>Encryption</th>
+            <th>Delivery Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let file of sentFiles">
+            <td>
+              <div class="file-cell font-sans">
+                <i class="fa-solid fa-file-shield text-sky"></i>
+                <span>{{ file.fileName }}</span>
+              </div>
+            </td>
+            <td><span class="text-secondary">{{ file.receiverUsername }}</span></td>
+            <td><span class="font-mono text-muted">{{ (file.fileSize / 1024 | number:'1.0-1') }} KB</span></td>
+            <td><span class="text-secondary">{{ formatDate(file.createdAt) }}</span></td>
+            <td><span class="saas-badge badge-sky">AES-256</span></td>
+            <td><span class="saas-badge badge-green"><span class="status-dot dot-green"></span> Delivered</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
 </div>

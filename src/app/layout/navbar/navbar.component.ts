@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, EventEmitter, Output } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { ToastService } from '../../services/toast.service';
@@ -9,29 +9,21 @@ import { ToastService } from '../../services/toast.service';
   styleUrls: ['./navbar.component.scss']
 })
 export class NavbarComponent {
+  @Output() toggleSidebar = new EventEmitter<void>();
 
   constructor(
-    private authService: AuthService,
+    public authService: AuthService,
     private router: Router,
     private toastService: ToastService
   ) { }
 
-  handleNav(route: string) {
-    if (this.authService.isLoggedIn()) {
-      this.router.navigate([route]);
-    } else {
-      this.toastService.show('Please sign in to access this feature', 'info');
-      this.router.navigate(['/login']);
-    }
-  }
-
-  logout() {
+  logout(): void {
     this.authService.logout();
-    this.toastService.show('Logged out successfully', 'success');
+    this.toastService.show('Session terminated. Logged out.', 'info');
     this.router.navigate(['/login']);
   }
 
-  isLoggedIn(): boolean {
-    return this.authService.isLoggedIn();
+  getUsername(): string {
+    return this.authService.getUsername() || 'GUEST_USER';
   }
 }

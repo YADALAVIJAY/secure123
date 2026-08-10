@@ -1,0 +1,39 @@
+<div class="offline-alert-container saas-card border-amber">
+  <div class="alert-icon-box">
+    <i class="fa-solid fa-triangle-exclamation icon-amber"></i>
+  </div>
+  
+  <div class="alert-header">
+    <h2>Antivirus Unavailable</h2>
+    <p class="alert-desc">We couldn't connect to the antivirus scanner server.</p>
+  </div>
+
+  <div class="status-summary">
+    <div class="summary-row">
+      <span class="label">Scanner Status</span>
+      <span class="saas-badge badge-amber"><span class="status-dot dot-amber"></span> Offline</span>
+    </div>
+    <div class="summary-row">
+      <span class="label">Scan Result</span>
+      <span class="val text-muted">Not Performed</span>
+    </div>
+    <div class="summary-row">
+      <span class="label">Security Decision</span>
+      <span class="saas-badge badge-neutral">Upload Blocked (Fail Closed)</span>
+    </div>
+  </div>
+
+  <div class="notice-box">
+    <i class="fa-solid fa-circle-info text-amber"></i>
+    <span><strong>Important Notice:</strong> Your file was NOT classified as malware. The scan could not be completed because the ClamAV server is unreachable.</span>
+  </div>
+
+  <div class="alert-actions">
+    <button class="saas-btn saas-btn-primary" (click)="retry.emit()">
+      <i class="fa-solid fa-rotate-right"></i> Try Again
+    </button>
+    <button class="saas-btn saas-btn-secondary" (click)="returnDashboard.emit()">
+      <i class="fa-solid fa-house"></i> Return to Dashboard
+    </button>
+  </div>
+</div>

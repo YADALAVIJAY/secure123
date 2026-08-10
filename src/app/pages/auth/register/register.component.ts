@@ -11,6 +11,7 @@ import { ToastService } from '../../../services/toast.service';
 })
 export class RegisterComponent implements OnInit {
   registerForm!: FormGroup;
+  isRegistering = false;
 
   constructor(
     private fb: FormBuilder,
@@ -21,9 +22,18 @@ export class RegisterComponent implements OnInit {
 
   ngOnInit(): void {
     this.registerForm = this.fb.group({
-      username: ['', Validators.required],
-      email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(6)]],
+      username: ['', [
+        Validators.required,
+        Validators.minLength(3),
+        Validators.maxLength(30),
+        Validators.pattern('^[a-zA-Z0-9_-]+$')
+      ]],
+      email: ['', [Validators.required, Validators.pattern('^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$')]],
+      password: ['', [
+        Validators.required,
+        Validators.minLength(8),
+        Validators.pattern('^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*?&#_~^+=><-]).{8,}$')
+      ]],
       confirmPassword: ['', Validators.required]
     }, { validators: this.passwordMatchValidator });
   }
@@ -36,9 +46,11 @@ export class RegisterComponent implements OnInit {
 
   onSubmit() {
     if (this.registerForm.valid) {
+      this.isRegistering = true;
       const { confirmPassword, ...registerData } = this.registerForm.value;
       this.authService.register(registerData).subscribe({
         next: (response) => {
+          this.isRegistering = false;
           // Handle success - backend might return string or JSON
           let successMessage = 'Registration successful! Please login.';
 
@@ -60,6 +72,7 @@ export class RegisterComponent implements OnInit {
           this.router.navigate(['/login']);
         },
         error: (error) => {
+          this.isRegistering = false;
           console.error('Registration failed', error);
           let errorMessage = 'Registration failed. Please try again.';
 

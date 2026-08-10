@@ -1,0 +1,45 @@
+<div class="threat-alert-container saas-card border-red">
+  <div class="alert-icon-box">
+    <i class="fa-solid fa-shield-virus icon-red"></i>
+  </div>
+
+  <div class="alert-header">
+    <h2>Security Threat Detected</h2>
+    <p class="alert-desc">The uploaded file was identified as malicious by the antivirus scanner.</p>
+  </div>
+
+  <div class="threat-details">
+    <div class="detail-row">
+      <span class="label">File Name</span>
+      <span class="val font-mono">{{ fileName || 'Malicious Payload' }}</span>
+    </div>
+    <div class="detail-row">
+      <span class="label">Threat Signature</span>
+      <span class="val text-red font-mono">{{ virusName || 'Win.Test.EICAR-8' }}</span>
+    </div>
+    <div class="detail-row" *ngIf="fileSize">
+      <span class="label">File Size</span>
+      <span class="val font-mono">{{ (fileSize / 1024).toFixed(1) }} KB</span>
+    </div>
+    <div class="detail-row">
+      <span class="label">Detection Engine</span>
+      <span class="val font-mono">ClamAV Antivirus Daemon</span>
+    </div>
+  </div>
+
+  <div class="enforcement-box">
+    <div class="enf-title">Automated Security Actions Taken:</div>
+    <ul class="enf-list">
+      <li><i class="fa-solid fa-check text-red"></i> File transfer blocked &amp; quarantined</li>
+      <li><i class="fa-solid fa-check text-red"></i> Security incident audit record generated</li>
+      <li><i class="fa-solid fa-check text-red"></i> User account suspended for policy violation</li>
+      <li><i class="fa-solid fa-check text-red"></i> Source IP address flagged for review</li>
+    </ul>
+  </div>
+
+  <div class="alert-actions">
+    <button class="saas-btn saas-btn-danger" (click)="acknowledge.emit()">
+      <i class="fa-solid fa-arrow-right-from-bracket"></i> Acknowledge &amp; Return to Login
+    </button>
+  </div>
+</div>

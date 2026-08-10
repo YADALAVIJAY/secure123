@@ -1,130 +1,105 @@
-<div class="received-files-container">
-    <div class="page-header glass-panel">
-        <h1><i class="fa-solid fa-inbox"></i> Received Files</h1>
-        <p class="subtitle">Securely encrypted files sent to you</p>
-    </div>
+<div class="files-page">
+  <div class="page-header">
+    <h1>Secure Inbox</h1>
+    <p class="page-subtitle">Encrypted payloads received from authorized operators. AES-256 and RSA-2048 protected.</p>
+  </div>
 
-    <div class="files-grid" *ngIf="!isLoading && receivedFiles.length > 0">
-        <div class="file-card glass-panel" *ngFor="let file of receivedFiles">
-            <div class="file-icon">
-                <i class="fa-solid fa-file-lock"></i>
-            </div>
-            <div class="file-info">
-                <h3 class="file-name">{{ file.fileName }}</h3>
-                <div class="file-meta">
-                    <span class="meta-item">
-                        <i class="fa-solid fa-user"></i>
-                        From: {{ file.senderUsername }}
-                    </span>
-                    <span class="meta-item">
-                        <i class="fa-solid fa-clock"></i>
-                        {{ formatDate(file.createdAt) }}
-                    </span>
-                </div>
-                <div class="security-badges">
-                    <span class="badge encrypted"><i class="fa-solid fa-lock"></i> Encrypted</span>
-                    <span class="badge signed"><i class="fa-solid fa-shield-check"></i> Signed</span>
-                </div>
-            </div>
-            <div class="file-actions">
-                <button class="btn-download" (click)="openDecryptModal(file)">
-                    <i class="fa-solid fa-key"></i> Decrypt AES Key
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <div class="empty-state" *ngIf="!isLoading && receivedFiles.length === 0">
-        <i class="fa-solid fa-inbox"></i>
-        <h2>No received files yet</h2>
-        <p>Files sent to you will appear here</p>
-    </div>
-
-    <!-- Encrypted Content Modal -->
-    <div class="modal-overlay" *ngIf="showEncryptedModal" (click)="closeEncryptedModal()">
-        <div class="modal-content" (click)="$event.stopPropagation()">
-            <div class="modal-header">
-                <h3>Encrypted Content: {{currentFileName}}</h3>
-                <button class="close-btn" (click)="closeEncryptedModal()"><i class="fa-solid fa-times"></i></button>
-            </div>
-            <div class="modal-body">
-                <p class="info-text">This is how your file looks on the server (AES-256 Encrypted).</p>
-                <div class="code-block">
-                    <pre>{{encryptedContent}}</pre>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn-secondary" (click)="closeEncryptedModal()">Close</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Manual Decrypt Modal -->
-    <div class="modal-overlay" *ngIf="showDecryptModal">
-        <div class="modal-content" style="max-width: 600px;" (click)="$event.stopPropagation()">
-            <div class="modal-header">
-                <h3>Secure Decryption: {{selectedFileName}}</h3>
-                <button class="close-btn" (click)="closeDecryptModal()"><i class="fa-solid fa-times"></i></button>
-            </div>
-            <div class="modal-body">
-
-                <!-- Step 1 -->
-                <div class="step-section">
-                    <h4><span class="step-number">1</span> Decrypt Session Key</h4>
-                    <p class="text-sm">Enter your RSA Private Key to unlock the AES Session Key.</p>
-                    <textarea class="form-control" rows="3" [(ngModel)]="manualPrivateKey"
-                        placeholder="-----BEGIN PRIVATE KEY..."></textarea>
-                    <button class="btn-primary mt-2" (click)="decryptKeyManually()">Unlock Key</button>
-
-                    <div class="result-box mt-3" *ngIf="decryptedAesKeyResult">
-                        <label>Decrypted AES Key:</label>
-                        <div class="input-group">
-                            <input type="text" class="form-control" [value]="decryptedAesKeyResult" readonly>
-                            <button class="btn-outline" (click)="copyToClipboard(decryptedAesKeyResult)">Copy</button>
-                        </div>
-                    </div>
-                </div>
-
-                <hr class="divider">
-
-                <!-- Step 2 -->
-                <div class="step-section">
-                    <h4><span class="step-number">2</span> Decrypt & Download File</h4>
-                    <p class="text-sm">Paste the Decrypted AES Key below to download the file.</p>
-                    <input type="text" class="form-control" [(ngModel)]="inputAesKey" placeholder="Paste AES Key here">
-                    <button class="btn-success mt-2 full-width" (click)="downloadWithManualKey()"
-                        [disabled]="!inputAesKey || downloadingFileId !== null">
-                        <i class="fa-solid" [class.fa-file-arrow-down]="downloadingFileId === null"
-                            [class.fa-spinner]="downloadingFileId !== null"
-                            [class.fa-spin]="downloadingFileId !== null"></i>
-                        {{ downloadingFileId !== null ? 'Downloading...' : 'Decrypt & Download File' }}
-                    </button>
-                </div>
-
-            </div>
-        </div>
+  <div class="files-panel saas-card">
+    <div class="panel-header">
+      <h2>Received Payloads</h2>
+      <span class="saas-badge badge-neutral">{{ receivedFiles.length }} Total</span>
     </div>
 
     <div class="loading-state" *ngIf="isLoading">
-        <div class="spinner"></div>
-        <p>Loading received files...</p>
+      <i class="fa-solid fa-circle-notch fa-spin text-sky"></i> Fetching transfers...
     </div>
 
-    <!-- Processing Modal -->
-    <div class="modal-overlay" *ngIf="isProcessing">
-        <div class="modal-content text-center" style="max-width: 400px; justify-content: center; align-items: center;">
-            <div class="spinner-container mb-3">
-                <i class="fa-solid fa-circle-notch fa-spin fa-3x" *ngIf="!isSuccess"
-                    style="color: var(--primary-color);"></i>
-                <i class="fa-solid fa-circle-check fa-3x" *ngIf="isSuccess"
-                    style="color: #00b894; animation: checkPop 0.5s ease;"></i>
-            </div>
-            <h3>{{ isSuccess ? 'Success!' : 'Processing...' }}</h3>
-            <p class="status-text">{{ processStatus }}</p>
-            <div class="progress-bar-container mt-3" *ngIf="!isSuccess" style="width: 100%;">
-                <div class="progress-bar"></div>
-            </div>
+    <div class="empty-state" *ngIf="!isLoading && receivedFiles.length === 0">
+      <i class="fa-solid fa-inbox text-muted"></i> No received files found in secure inbox.
+    </div>
+
+    <div class="table-container" *ngIf="!isLoading && receivedFiles.length > 0">
+      <table class="saas-table">
+        <thead>
+          <tr>
+            <th>File Name</th>
+            <th>Sender</th>
+            <th>Size</th>
+            <th>Received Date</th>
+            <th>Scan Result</th>
+            <th>Encryption</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let file of receivedFiles">
+            <td>
+              <div class="file-cell font-sans">
+                <i class="fa-solid fa-file-shield text-sky"></i>
+                <span>{{ file.fileName }}</span>
+              </div>
+            </td>
+            <td><span class="text-secondary">{{ file.senderUsername }}</span></td>
+            <td><span class="font-mono text-muted">{{ (file.fileSize / 1024 | number:'1.0-1') }} KB</span></td>
+            <td><span class="text-secondary">{{ formatDate(file.createdAt) }}</span></td>
+            <td><span class="saas-badge badge-green">Clean</span></td>
+            <td><span class="saas-badge badge-sky">AES-256</span></td>
+            <td>
+              <button class="saas-btn saas-btn-sky compact-btn" (click)="openDecryptModal(file)" [disabled]="isDownloading(file.id)">
+                <i class="fa-solid fa-unlock" *ngIf="!isDownloading(file.id)"></i>
+                <i class="fa-solid fa-circle-notch fa-spin" *ngIf="isDownloading(file.id)"></i>
+                Decrypt
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Private Key Modal -->
+  <app-private-key-modal
+    *ngIf="showPrivateKeyModal"
+    [fileName]="selectedFileName"
+    [isVisible]="showPrivateKeyModal"
+    (cancel)="onPrivateKeyCancelled()"
+    (decrypt)="onPrivateKeyProvided($event)">
+  </app-private-key-modal>
+
+  <!-- Decrypt Session Key Modal -->
+  <div class="modal-overlay" *ngIf="showDecryptModal">
+    <div class="decrypt-dialog saas-card border-sky">
+      <div class="dialog-header">
+        <h3>Decrypt Payload: {{ selectedFileName }}</h3>
+        <button class="close-btn" (click)="closeDecryptModal()"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <div class="dialog-body">
+        <div class="step-box" *ngIf="!decryptedAesKeyResult">
+          <div class="step-title">Step 1 — Enter RSA Private Key to unlock session key</div>
+          <textarea class="saas-input font-mono" rows="4" [(ngModel)]="manualPrivateKey" placeholder="Paste your RSA-2048 private key..."></textarea>
+          <button class="saas-btn saas-btn-primary full-width" (click)="decryptKeyManually()" [disabled]="isProcessing">
+            <i class="fa-solid fa-key" *ngIf="!isProcessing"></i>
+            <i class="fa-solid fa-circle-notch fa-spin" *ngIf="isProcessing"></i>
+            Decrypt Session Key
+          </button>
         </div>
-    </div>
 
+        <div class="step-box" *ngIf="decryptedAesKeyResult">
+          <div class="step-title">Step 2 — Session Key Recovered</div>
+          <div class="key-box font-mono">
+            <span class="key-val text-green">{{ decryptedAesKeyResult }}</span>
+            <button class="saas-btn saas-btn-secondary compact-btn" (click)="copyToClipboard(decryptedAesKeyResult)"><i class="fa-solid fa-copy"></i> Copy</button>
+          </div>
+          <div class="step-title margin-top">Step 3 — Paste Hex Key to decrypt file content</div>
+          <input class="saas-input font-mono" type="text" [(ngModel)]="inputAesKey" placeholder="Paste 64-char Hex Session Key..." />
+          <button class="saas-btn saas-btn-primary full-width" (click)="downloadWithManualKey()" [disabled]="isProcessing">
+            <i class="fa-solid fa-download" *ngIf="!isProcessing"></i>
+            <i class="fa-solid fa-circle-notch fa-spin" *ngIf="isProcessing"></i>
+            Decrypt &amp; Download File
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>

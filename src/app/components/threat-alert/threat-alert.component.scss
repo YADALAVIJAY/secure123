@@ -1,0 +1,117 @@
+.threat-alert-container {
+  max-width: 520px;
+  width: 100%;
+  padding: 32px;
+  background-color: var(--bg-surface);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 20px;
+}
+
+.alert-icon-box {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .icon-red {
+    font-size: 1.6rem;
+    color: var(--danger-red);
+  }
+}
+
+.alert-header {
+  h2 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-main);
+  }
+
+  .alert-desc {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-top: 4px;
+  }
+}
+
+.threat-details {
+  width: 100%;
+  background-color: var(--bg-dark);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-size: 0.85rem;
+
+  .detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .label {
+      color: var(--text-muted);
+    }
+    .val {
+      color: var(--text-main);
+    }
+    .text-red {
+      color: var(--danger-red);
+      font-weight: 600;
+    }
+  }
+}
+
+.enforcement-box {
+  width: 100%;
+  background: rgba(239, 68, 68, 0.06);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: 6px;
+  padding: 14px 16px;
+  text-align: left;
+
+  .enf-title {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-main);
+    margin-bottom: 8px;
+  }
+
+  .enf-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+
+    li {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      .text-red {
+        color: var(--danger-red);
+      }
+    }
+  }
+}
+
+.alert-actions {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+
+  .saas-btn {
+    width: 100%;
+  }
+}

@@ -1,0 +1,289 @@
+<div class="upload-page">
+  <!-- Page Header -->
+  <div class="page-header">
+    <h1>Secure File Platform</h1>
+    <p class="page-subtitle">Verify any file with ClamAV malware scanning, then securely share clean verified files using Zero Trust encryption.</p>
+  </div>
+
+  <!-- Flowchart Workflow Visual Diagram -->
+  <div class="workflow-banner saas-card">
+    <div class="banner-title">
+      <i class="fa-solid fa-sitemap text-sky"></i>
+      <span>PLATFORM SECURITY WORKFLOW</span>
+    </div>
+
+    <div class="diagram-flow">
+      <!-- Verify Branch -->
+      <div class="flow-branch" [class.active-branch]="activeTab === 'verify'">
+        <div class="branch-label"><i class="fa-solid fa-shield-virus"></i> 1. VERIFY FILE</div>
+        <div class="branch-steps font-mono">
+          <span>Upload File</span> &rarr; <span>Validation</span> &rarr; <span>ClamAV Scan</span>
+        </div>
+        <div class="outcome-pill-group">
+          <span class="outcome-pill pill-clean">CLEAN &rarr; VERIFIED</span>
+          <span class="outcome-pill pill-malware">MALWARE &rarr; ALERT + DELETE</span>
+          <span class="outcome-pill pill-offline">OFFLINE &rarr; UNAVAILABLE</span>
+        </div>
+      </div>
+
+      <div class="flow-connector">
+        <i class="fa-solid fa-chevron-right"></i>
+      </div>
+
+      <!-- Share Branch -->
+      <div class="flow-branch" [class.active-branch]="activeTab === 'share'">
+        <div class="branch-label"><i class="fa-solid fa-paper-plane"></i> 2. SECURE SHARE</div>
+        <div class="branch-steps font-mono">
+          <span>Select Clean File</span> &rarr; <span>Encryption (AES+RSA)</span> &rarr; <span>Access Control</span> &rarr; <span>Download</span>
+        </div>
+        <div class="outcome-pill-group">
+          <span class="outcome-pill pill-verified">ZERO TRUST DELIVERY</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Workflow Mode Selector Tabs -->
+  <div class="mode-tabs">
+    <button
+      class="tab-btn"
+      [class.active]="activeTab === 'verify'"
+      (click)="switchTab('verify')"
+    >
+      <i class="fa-solid fa-shield-virus"></i>
+      <span>VERIFY FILE</span>
+      <span class="tab-badge" *ngIf="isVerified">VERIFIED CLEAN</span>
+    </button>
+
+    <button
+      class="tab-btn"
+      [class.active]="activeTab === 'share'"
+      (click)="switchTab('share')"
+    >
+      <i class="fa-solid fa-paper-plane"></i>
+      <span>SECURE SHARE</span>
+    </button>
+  </div>
+
+  <!-- Main Grid Layout -->
+  <div class="upload-layout">
+    <!-- Left Column: File Selection & Actions -->
+    <div class="upload-left">
+      <!-- Drag & Drop Zone -->
+      <div
+        class="dropzone saas-card"
+        [class.drag-over]="isDragOver"
+        [class.file-selected]="selectedFile && scanState === 'idle'"
+        (dragover)="onDragOver($event)"
+        (dragleave)="onDragLeave()"
+        (drop)="onDrop($event)"
+        (click)="fileInput.click()"
+      >
+        <input #fileInput type="file" hidden (change)="onFileSelected($event)" />
+
+        <ng-container *ngIf="!selectedFile">
+          <div class="drop-icon">
+            <i class="fa-solid fa-arrow-up-from-bracket text-sky"></i>
+          </div>
+          <div class="drop-text font-sans">
+            <span class="drop-main">
+              {{ activeTab === 'verify' ? 'Drag & drop any file to verify' : 'Drag & drop clean file to share' }}
+            </span>
+            <span class="drop-sub">or <strong class="text-sky">Browse Files</strong> from computer</span>
+          </div>
+          <div class="drop-note text-muted">Supports all file formats &bull; Scanned by ClamAV</div>
+        </ng-container>
+
+        <ng-container *ngIf="selectedFile && scanState === 'idle'">
+          <div class="file-selected-icon">
+            <i class="fa-solid fa-file-shield text-green" *ngIf="isVerified"></i>
+            <i class="fa-solid fa-file-arrow-up text-sky" *ngIf="!isVerified"></i>
+          </div>
+          <div class="file-name font-sans">{{ selectedFile.name }}</div>
+          <div class="file-meta font-sans">
+            {{ fileSizeKb }} KB &bull; {{ selectedFile.type || 'application/octet-stream' }}
+            <span class="saas-badge badge-green margin-left" *ngIf="isVerified">VERIFIED CLEAN</span>
+          </div>
+        </ng-container>
+      </div>
+
+      <!-- Selected File Info -->
+      <div class="file-info-panel saas-card" *ngIf="selectedFile">
+        <div class="panel-title font-sans">
+          <i class="fa-solid fa-circle-info text-sky"></i> File Properties
+        </div>
+        <div class="info-grid font-sans">
+          <div class="info-row"><span class="label">File Name:</span><span class="val">{{ selectedFile.name }}</span></div>
+          <div class="info-row"><span class="label">File Size:</span><span class="val">{{ fileSizeKb }} KB</span></div>
+          <div class="info-row"><span class="label">SHA-256 Hash:</span><span class="val font-mono text-green">{{ fileHash || 'Computing...' }}</span></div>
+          <div class="info-row"><span class="label">ClamAV Status:</span>
+            <span class="val">
+              <span class="saas-badge badge-green" *ngIf="isVerified">VERIFIED CLEAN</span>
+              <span class="saas-badge badge-neutral" *ngIf="!isVerified">UNSCANNED</span>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mode A Action: VERIFY FILE -->
+      <div class="action-panel saas-card" *ngIf="activeTab === 'verify'">
+        <div class="panel-title font-sans">
+          <i class="fa-solid fa-shield-virus text-green"></i> Verify File Safety (ClamAV Scan)
+        </div>
+        <p class="panel-desc">Scan file structure, MIME headers, and antivirus signature databases without sending to any recipient.</p>
+
+        <button *ngIf="!selectedFile" class="saas-btn saas-btn-sky full-width" (click)="fileInput.click()">
+          <i class="fa-solid fa-folder-open"></i> Select File to Verify
+        </button>
+
+        <button *ngIf="selectedFile && scanState === 'idle'" class="saas-btn saas-btn-primary full-width" (click)="startVerification()">
+          <i class="fa-solid fa-magnifying-glass"></i> Run ClamAV Security Verification
+        </button>
+
+        <button *ngIf="selectedFile && scanState === 'clean'" class="saas-btn saas-btn-sky full-width" (click)="proceedToShare()">
+          <i class="fa-solid fa-paper-plane"></i> File Verified Clean — Proceed to Share
+        </button>
+      </div>
+
+      <!-- Mode B Action: SECURE SHARE -->
+      <div class="action-panel saas-card" *ngIf="activeTab === 'share'">
+        <div class="panel-title font-sans">
+          <i class="fa-solid fa-paper-plane text-sky"></i> Secure Share to Recipient
+        </div>
+
+        <button *ngIf="!selectedFile" class="saas-btn saas-btn-sky full-width" (click)="fileInput.click()">
+          <i class="fa-solid fa-folder-open"></i> Select File to Share
+        </button>
+
+        <ng-container *ngIf="selectedFile">
+          <div class="form-group">
+            <label>Recipient Username</label>
+            <input
+              type="text"
+              class="saas-input"
+              [(ngModel)]="receiverUsername"
+              placeholder="Enter recipient username (e.g. alice)"
+            />
+          </div>
+          <div class="action-row margin-top">
+            <button class="saas-btn saas-btn-primary full-width" (click)="startTransfer()" [disabled]="scanState !== 'idle'">
+              <i class="fa-solid fa-key"></i> Encrypt &amp; Dispatch Payload
+            </button>
+            <button class="saas-btn saas-btn-secondary" (click)="clearFile()" title="Clear">
+              <i class="fa-solid fa-trash"></i>
+            </button>
+          </div>
+        </ng-container>
+      </div>
+    </div>
+
+    <!-- Right Column: Pipeline Tracker & Terminal -->
+    <div class="upload-right">
+      <!-- Pipeline Steps Tracker -->
+      <div class="timeline-card saas-card">
+        <div class="panel-title font-sans">
+          <i class="fa-solid fa-list-check text-sky"></i> Security Execution Pipeline
+        </div>
+        <div class="timeline-steps">
+          <div class="timeline-step" *ngFor="let step of pipeline; let i = index">
+            <div class="step-connector" *ngIf="i > 0"></div>
+            <div class="step-row">
+              <div class="step-badge" [ngClass]="{
+                'badge-waiting': step.state === 'WAITING',
+                'badge-active': step.state === 'ACTIVE',
+                'badge-passed': step.state === 'PASSED',
+                'badge-failed': step.state === 'FAILED'
+              }">
+                <i class="fa-solid {{ step.icon }}"></i>
+              </div>
+              <div class="step-content">
+                <span class="step-name">{{ step.label }}</span>
+                <span class="step-status-tag" [ngClass]="{
+                  'tag-muted': step.state === 'WAITING',
+                  'tag-sky': step.state === 'ACTIVE',
+                  'tag-green': step.state === 'PASSED',
+                  'tag-red': step.state === 'FAILED'
+                }">{{ step.state }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Terminal Log Component -->
+      <app-terminal [logs]="terminalLogs" title="Platform Security Log"></app-terminal>
+    </div>
+  </div>
+
+  <!-- ClamAV Scanning Modal -->
+  <div class="modal-overlay" *ngIf="scanState === 'scanning' || scanState === 'signing'">
+    <div class="scan-dialog saas-card border-sky">
+      <div class="scan-header">
+        <span class="saas-badge badge-sky">
+          <span class="status-dot dot-sky"></span> ClamAV Engine Scanning
+        </span>
+      </div>
+      <div class="scan-body">
+        <div class="spinner-box">
+          <i class="fa-solid fa-shield-virus fa-spin text-sky"></i>
+        </div>
+        <div class="scan-title">
+          {{ scanState === 'signing' ? 'Applying RSA-2048 Encryption...' : 'ClamAV Stream Inspection in Progress...' }}
+        </div>
+        <p class="scan-sub">Validating file against malware definitions</p>
+        <div class="scan-progress-bar">
+          <div class="scan-progress-fill"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Clean Verified Result Dialog -->
+  <div class="modal-overlay" *ngIf="scanState === 'clean'">
+    <div class="result-dialog saas-card border-green">
+      <div class="result-icon-box">
+        <i class="fa-solid fa-circle-check text-green"></i>
+      </div>
+      <h2>{{ activeTab === 'verify' ? 'File Verified Clean' : 'Payload Encrypted & Dispatched' }}</h2>
+      <p class="result-sub">
+        {{ activeTab === 'verify' ? 'Your file passed the ClamAV security scan and is marked VERIFIED.' : 'Your file was encrypted and shared with recipient.' }}
+      </p>
+
+      <div class="checks-summary">
+        <div class="chk-row"><span>File Name</span><span class="font-mono text-main">{{ selectedFile?.name }}</span></div>
+        <div class="chk-row"><span>ClamAV Scan</span><span class="saas-badge badge-green">Passed Clean</span></div>
+        <div class="chk-row"><span>Status</span><span class="saas-badge badge-green">VERIFIED</span></div>
+      </div>
+
+      <div class="dialog-actions">
+        <button class="saas-btn saas-btn-sky full-width" *ngIf="activeTab === 'verify'" (click)="proceedToShare()">
+          <i class="fa-solid fa-paper-plane"></i> Proceed to Secure Share
+        </button>
+        <button class="saas-btn saas-btn-secondary full-width" (click)="clearFile()">
+          <i class="fa-solid fa-plus"></i> Work with Another File
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ClamAV Offline Warning -->
+  <div class="modal-overlay" *ngIf="scanState === 'offline'">
+    <app-offline-alert
+      [errorMessage]="errorMessage || 'Unable to connect to the ClamAV antivirus server.'"
+      (retry)="retryUpload()"
+      (returnDashboard)="router.navigate(['/dashboard'])"
+    >
+    </app-offline-alert>
+  </div>
+
+  <!-- Threat Incident Alert -->
+  <div class="modal-overlay" *ngIf="scanState === 'threat'">
+    <app-threat-alert
+      [fileName]="selectedFile?.name || ''"
+      [virusName]="virusName"
+      [fileSize]="selectedFile?.size || 0"
+      (acknowledge)="dismissThreat()"
+    >
+    </app-threat-alert>
+  </div>
+</div>

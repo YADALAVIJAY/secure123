@@ -1,11 +1,13 @@
-<div class="security-badge glass-panel">
-    <div class="status-header">
-        <i class="fa-solid fa-shield-halved"></i>
-        <span>Secure Hybrid Encryption</span>
-    </div>
-    <div class="details">
-        <span class="pill" title="Symmetric Encryption">AES-256</span>
-        <span class="pill" title="Key Exchange">RSA-2048</span>
-        <span class="pill" title="Digital Signature">SHA-256</span>
-    </div>
-</div>
+<span class="cyber-badge" [ngClass]="{
+  'badge-green': status === 'ONLINE' || status === 'VERIFIED' || status === 'ACTIVE',
+  'badge-cyan': status === 'SCANNING',
+  'badge-amber': status === 'OFFLINE',
+  'badge-red': status === 'BLOCKED' || status === 'ERROR'
+}">
+  <span class="pulse-indicator" [ngClass]="{
+    'online': status === 'ONLINE' || status === 'VERIFIED' || status === 'ACTIVE',
+    'warning': status === 'OFFLINE' || status === 'SCANNING',
+    'offline': status === 'BLOCKED' || status === 'ERROR'
+  }"></span>
+  <span>{{ label || status }}</span>
+</span>

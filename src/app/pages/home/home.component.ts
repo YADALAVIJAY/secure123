@@ -1,9 +1,6 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
-import { ToastService } from '../../services/toast.service';
-import { ApiService } from '../../services/api.service';
-import { CryptoService } from '../../services/crypto.service';
 
 @Component({
   selector: 'app-home',
@@ -11,119 +8,70 @@ import { CryptoService } from '../../services/crypto.service';
   styleUrls: ['./home.component.scss']
 })
 export class HomeComponent {
-  showUploadModal = false;
-  selectedFile: File | null = null;
-  selectedFileName = '';
+  terminalLogs: string[] = [
+    'System initialized :: Zero Trust Protocol Active',
+    'ClamAV Engine Daemon :: Ready (Port 3310)',
+    'AES-256 / RSA-2048 Cryptographic Handshake :: OK',
+    'Real-time IP Threat Blacklisting :: ACTIVE',
+    'Awaiting payload transmission...'
+  ];
 
-  isUploading = false;
-  isSuccess = false;
-  uploadStatus = '';
+  features = [
+    {
+      num: '01',
+      title: 'CLAMAV MALWARE SCANNING',
+      icon: 'fa-shield-virus',
+      desc: 'Real-time INSTREAM antivirus socket scanning inspects binary file streams before plaintext persistence or key wrapping occurs.'
+    },
+    {
+      num: '02',
+      title: 'AI THREAT DETECTION',
+      icon: 'fa-brain',
+      desc: 'Intelligent anomaly detection algorithms analyze file entropy, MIME headers, and client upload telemetry to intercept unknown zero-days.'
+    },
+    {
+      num: '03',
+      title: 'HYBRID ENCRYPTION',
+      icon: 'fa-key',
+      desc: 'Combines high-speed AES-256-GCM symmetric payload encryption with RSA-2048 asymmetric key wrapping for ultimate confidentiality.'
+    },
+    {
+      num: '04',
+      title: 'ZERO TRUST ACCESS',
+      icon: 'fa-user-lock',
+      desc: 'Strict identity verification ensures no party can decrypt files without explicit authorization and valid RSA private key credentials.'
+    },
+    {
+      num: '05',
+      title: 'BLOCKCHAIN INTEGRITY',
+      icon: 'fa-cubes',
+      desc: 'Client-side SHA-256 cryptographic hashing guarantees immutable payload verification and tamper prevention across transport.'
+    },
+    {
+      num: '06',
+      title: 'IP / USER THREAT BLOCKING',
+      icon: 'fa-ban',
+      desc: 'Automatic propagation of permanent user account bans and IP address blacklisting upon detection of malicious payloads.'
+    }
+  ];
 
   constructor(
-    private authService: AuthService,
-    private router: Router,
-    private toastService: ToastService,
-    private apiService: ApiService,
-    private cryptoService: CryptoService
-  ) { }
+    public authService: AuthService,
+    private router: Router
+  ) {}
 
-  onFileSelected(file: File) {
-    if (!this.authService.isLoggedIn()) {
-      this.toastService.show('Please sign in to upload files', 'info');
-      this.router.navigate(['/login']);
-      return;
-    }
-
-    // Show modal with file info
-    this.selectedFile = file;
-    this.selectedFileName = file.name;
-    this.showUploadModal = true;
-    this.isSuccess = false; // Reset state
-  }
-
-  onUploadConfirmed(receiverUsername: string) {
-    if (!this.selectedFile) return;
-
-    this.isUploading = true;
-    this.isSuccess = false;
-    this.uploadStatus = 'Initiating Secure Transfer...';
-    // Close the input modal so we can show the progress modal
-    this.showUploadModal = false;
-
-    const receiver = receiverUsername;
-
-    // 1. Fetch Receiver Public Key
-    this.apiService.getPublicKey(receiver).subscribe({
-      next: async (data: any) => {
-        const receiverPublicKey = data.publicKey;
-
-        try {
-          // 2. Read File for Signing (Client-Side)
-          const fileBuffer = await this.cryptoService.blobToArrayBuffer(this.selectedFile!);
-
-          // 3. Digital Signature (Client-Side Authenticity)
-          this.uploadStatus = 'Signing Data (Digital Signature)...';
-          await new Promise(r => setTimeout(r, 300));
-
-          const senderPrivateKey = this.authService.getPrivateKey();
-          if (!senderPrivateKey) throw new Error("Private Key not found. Please re-login.");
-          const signature = this.cryptoService.signData(fileBuffer, senderPrivateKey);
-
-          // 4. Upload Plaintext File (For Server-Side Scanning & Encryption)
-          this.uploadStatus = 'Uploading File for Secure Scanning...';
-          this.apiService.uploadFile(this.selectedFile!, this.selectedFile!.name, receiver, signature)
-            .subscribe({
-              next: (response) => {
-                this.uploadStatus = 'File Scanned & Encrypted Successfully!';
-                this.isSuccess = true; // Trigger success state
-
-                // Keep success message for a bit before closing
-                setTimeout(() => {
-                  this.isUploading = false;
-                  this.isSuccess = false;
-                  this.selectedFile = null;
-                }, 2000);
-              },
-              error: (error) => {
-                console.error('Upload failed', error);
-                const errorMessage = error.error?.message || error.message;
-
-                if (errorMessage && (errorMessage.includes('Malware') || errorMessage.includes('Security Alert'))) {
-                  this.toastService.show('⚠️ DANGER: Malicious File Detected! Upload Blocked.', 'error');
-                } else {
-                  this.toastService.show('Upload failed: ' + errorMessage, 'error');
-                }
-
-                this.isUploading = false;
-                this.selectedFile = null;
-              }
-            });
-
-        } catch (e: any) {
-          console.error(e);
-          this.toastService.show('Encryption Error: ' + e.message, 'error');
-          this.isUploading = false;
-        }
-      },
-      error: (err) => {
-        this.toastService.show('Receiver not found or invalid.', 'error');
-        this.isUploading = false;
-      }
-    });
-  }
-
-  onUploadCancelled() {
-    this.showUploadModal = false;
-    this.selectedFile = null;
-    this.selectedFileName = '';
-  }
-
-  handleToggle(route: string) {
+  onStartTransfer(): void {
     if (this.authService.isLoggedIn()) {
-      this.router.navigate([route]);
+      this.router.navigate(['/upload']);
     } else {
-      this.toastService.show('Please sign in to access this feature', 'info');
       this.router.navigate(['/login']);
+    }
+  }
+
+  scrollToSection(sectionId: string): void {
+    const el = document.getElementById(sectionId);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth' });
     }
   }
 }

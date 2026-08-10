@@ -1,4 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
+
+export type SecurityStatusType = 'ONLINE' | 'OFFLINE' | 'SCANNING' | 'BLOCKED' | 'VERIFIED' | 'ERROR' | 'ACTIVE';
 
 @Component({
   selector: 'app-security-status',
@@ -6,5 +8,6 @@ import { Component } from '@angular/core';
   styleUrls: ['./security-status.component.scss']
 })
 export class SecurityStatusComponent {
-
+  @Input() status: SecurityStatusType = 'ONLINE';
+  @Input() label = '';
 }

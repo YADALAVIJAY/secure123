@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
+import { SidebarComponent } from './layout/sidebar/sidebar.component';
 
 @Component({
   selector: 'app-root',
@@ -6,5 +7,12 @@ import { Component } from '@angular/core';
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent {
-  title = 'hybrid-file-transfer';
+  title = 'SecureFileShare';
+  @ViewChild(SidebarComponent) sidebar!: SidebarComponent;
+
+  onToggleSidebar(): void {
+    if (this.sidebar) {
+      this.sidebar.toggleMobileMenu();
+    }
+  }
 }

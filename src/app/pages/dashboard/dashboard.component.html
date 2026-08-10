@@ -1,0 +1,146 @@
+<div class="dashboard-page">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-left">
+      <h1>Dashboard</h1>
+      <p class="page-subtitle">Monitor your secure file activity and system protection status.</p>
+    </div>
+    <div class="header-right">
+      <a routerLink="/upload" class="saas-btn saas-btn-primary">
+        <i class="fa-solid fa-arrow-up-from-bracket"></i> Transfer Files
+      </a>
+    </div>
+  </div>
+
+  <!-- 4 Compact Statistic Cards -->
+  <div class="stats-grid">
+    <div class="stat-card saas-card">
+      <div class="stat-meta">
+        <span class="stat-label">Files Uploaded</span>
+        <div class="stat-icon-box"><i class="fa-solid fa-arrow-up-from-bracket text-sky"></i></div>
+      </div>
+      <div class="stat-value">{{ totalUploaded }}</div>
+    </div>
+
+    <div class="stat-card saas-card">
+      <div class="stat-meta">
+        <span class="stat-label">Files Scanned</span>
+        <div class="stat-icon-box"><i class="fa-solid fa-shield-halved text-green"></i></div>
+      </div>
+      <div class="stat-value">{{ totalScanned }}</div>
+    </div>
+
+    <div class="stat-card saas-card">
+      <div class="stat-meta">
+        <span class="stat-label">Threats Blocked</span>
+        <div class="stat-icon-box"><i class="fa-solid fa-ban text-red"></i></div>
+      </div>
+      <div class="stat-value">0</div>
+    </div>
+
+    <div class="stat-card saas-card">
+      <div class="stat-meta">
+        <span class="stat-label">Files Received</span>
+        <div class="stat-icon-box"><i class="fa-solid fa-inbox text-amber"></i></div>
+      </div>
+      <div class="stat-value">{{ totalReceived }}</div>
+    </div>
+  </div>
+
+  <!-- Main Grid: Recent Activity + Security Status Matrix -->
+  <div class="main-grid">
+    <!-- Recent Activity Table -->
+    <div class="activity-panel saas-card">
+      <div class="panel-header">
+        <h2>Recent Activity</h2>
+        <a routerLink="/sent" class="view-all-link">View All</a>
+      </div>
+
+      <div class="table-container">
+        <table class="saas-table">
+          <thead>
+            <tr>
+              <th>File</th>
+              <th>Recipient / Sender</th>
+              <th>Security Scan</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let file of sentFiles.slice(0, 5)">
+              <td>
+                <div class="file-cell font-sans">
+                  <i class="fa-solid fa-file-shield text-sky"></i>
+                  <span>{{ file.fileName }}</span>
+                </div>
+              </td>
+              <td><span class="text-secondary">{{ file.receiverUsername }}</span></td>
+              <td><span class="saas-badge badge-green">Clean</span></td>
+              <td><span class="saas-badge badge-sky">Encrypted</span></td>
+            </tr>
+            <tr *ngIf="sentFiles.length === 0">
+              <td colspan="4" class="empty-cell text-muted">
+                No recent file activity recorded.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Right Side: Security Status & Security Logs -->
+    <div class="side-column">
+      <!-- Security Status Card -->
+      <div class="status-panel saas-card">
+        <div class="panel-header">
+          <h2>Security Services</h2>
+        </div>
+
+        <div class="status-list">
+          <div class="status-item">
+            <div class="status-label">
+              <i class="fa-solid fa-shield-virus text-green"></i>
+              <span>ClamAV Engine</span>
+            </div>
+            <span class="saas-badge badge-green">
+              <span class="status-dot dot-green"></span> Online
+            </span>
+          </div>
+
+          <div class="status-item">
+            <div class="status-label">
+              <i class="fa-solid fa-key text-sky"></i>
+              <span>Encryption (AES-256)</span>
+            </div>
+            <span class="saas-badge badge-sky">
+              <span class="status-dot dot-sky"></span> Active
+            </span>
+          </div>
+
+          <div class="status-item">
+            <div class="status-label">
+              <i class="fa-solid fa-fingerprint text-green"></i>
+              <span>Integrity Hash (SHA-256)</span>
+            </div>
+            <span class="saas-badge badge-green">
+              <span class="status-dot dot-green"></span> Verified
+            </span>
+          </div>
+
+          <div class="status-item">
+            <div class="status-label">
+              <i class="fa-solid fa-user-lock text-sky"></i>
+              <span>Zero Trust Policy</span>
+            </div>
+            <span class="saas-badge badge-sky">
+              <span class="status-dot dot-sky"></span> Active
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Security Logs Feed -->
+      <app-terminal [logs]="terminalLogs" title="Security Event Feed"></app-terminal>
+    </div>
+  </div>
+</div>

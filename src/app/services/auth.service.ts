@@ -61,6 +61,7 @@ export class AuthService {
   logout(): void {
     localStorage.removeItem('token');
     localStorage.removeItem('username');
+    localStorage.removeItem('privateKey');
   }
 
   savePrivateKey(key: string): void {

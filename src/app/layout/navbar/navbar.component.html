@@ -1,21 +1,39 @@
-<nav class="navbar glass-panel">
-    <div class="container nav-content">
-        <a routerLink="/" class="logo">
-            <i class="fa-solid fa-shield-halved"></i> HybridTransfer
-        </a>
-
-        <div class="nav-links">
-            <a (click)="handleNav('/')" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Send</a>
-            <a (click)="handleNav('/sent')" routerLinkActive="active">Sent</a>
-            <a (click)="handleNav('/inbox')" routerLinkActive="active">Inbox</a>
-            <a (click)="handleNav('/profile')" routerLinkActive="active" *ngIf="isLoggedIn()">
-                <i class="fa-solid fa-user-circle"></i> Profile
-            </a>
-        </div>
-
-        <div class="auth-buttons">
-            <a *ngIf="!isLoggedIn()" routerLink="/login" class="btn-login">Sign in</a>
-            <a *ngIf="isLoggedIn()" (click)="logout()" class="btn-login" style="cursor: pointer;">Logout</a>
-        </div>
+<header class="navbar-container">
+  <div class="navbar-left">
+    <button class="mobile-toggle-btn" (click)="toggleSidebar.emit()">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+    <div class="breadcrumb-trail">
+      <span class="platform-name">SecureFileShare</span>
+      <span class="sep">/</span>
+      <span class="current-page">Enterprise Security</span>
     </div>
-</nav>
+  </div>
+
+  <div class="navbar-right">
+    <!-- Health Indicator -->
+    <div class="health-pill">
+      <span class="status-dot dot-green"></span>
+      <span class="pill-text">All Systems Operational</span>
+    </div>
+
+    <!-- Auth Actions -->
+    <ng-container *ngIf="authService.isLoggedIn(); else guestNav">
+      <div class="user-menu font-sans">
+        <div class="user-avatar">
+          <i class="fa-solid fa-user-shield"></i>
+        </div>
+        <span class="user-name">{{ getUsername() }}</span>
+      </div>
+      <button class="saas-btn saas-btn-secondary logout-btn" (click)="logout()">
+        <i class="fa-solid fa-arrow-right-from-bracket"></i>
+        <span>Logout</span>
+      </button>
+    </ng-container>
+
+    <ng-template #guestNav>
+      <a routerLink="/login" class="saas-btn saas-btn-secondary">Sign In</a>
+      <a routerLink="/register" class="saas-btn saas-btn-primary">Register</a>
+    </ng-template>
+  </div>
+</header>

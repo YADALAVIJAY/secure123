@@ -1,6 +1,10 @@
-<app-navbar></app-navbar>
-<div class="main-content">
-  <router-outlet></router-outlet>
+<div class="soc-layout">
+  <app-sidebar></app-sidebar>
+  <div class="soc-main">
+    <app-navbar (toggleSidebar)="onToggleSidebar()"></app-navbar>
+    <main class="page-container">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
 </div>
-<app-security-status></app-security-status>
 <app-toast></app-toast>

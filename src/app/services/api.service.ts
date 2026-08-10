@@ -24,6 +24,12 @@ export class ApiService {
     return this.http.get(`${environment.apiUrl}/users/${username}/public-key`, { headers: this.getHeaders() });
   }
 
+  verifyFile(file: Blob, filename: string): Observable<any> {
+    const formData = new FormData();
+    formData.append('file', file, filename);
+    return this.http.post(`${this.apiUrl}/verify`, formData, { headers: this.getHeaders() });
+  }
+
   uploadFile(file: Blob, filename: string, receiverUsername: string, signature: string): Observable<any> {
     const formData = new FormData();
     formData.append('file', file, filename);

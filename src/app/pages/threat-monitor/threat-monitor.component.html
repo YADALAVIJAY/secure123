@@ -1,0 +1,79 @@
+<div class="threat-monitor-page">
+  <div class="page-header">
+    <h1>Security Overview</h1>
+    <p class="page-subtitle">Real-time security event telemetry, malware inspection monitoring, and audit log.</p>
+  </div>
+
+  <!-- Security Overview Sections -->
+  <div class="overview-grid">
+    <div class="ov-card saas-card">
+      <div class="ov-meta">
+        <span class="ov-title">Threat Protection</span>
+        <span class="saas-badge badge-green"><span class="status-dot dot-green"></span> Online</span>
+      </div>
+      <div class="ov-sub">ClamAV Daemon Listening (Port 3310)</div>
+    </div>
+
+    <div class="ov-card saas-card">
+      <div class="ov-meta">
+        <span class="ov-title">Hybrid Encryption</span>
+        <span class="saas-badge badge-sky"><span class="status-dot dot-sky"></span> Active</span>
+      </div>
+      <div class="ov-sub">AES-256-GCM + RSA-2048</div>
+    </div>
+
+    <div class="ov-card saas-card">
+      <div class="ov-meta">
+        <span class="ov-title">Integrity Check</span>
+        <span class="saas-badge badge-green"><span class="status-dot dot-green"></span> Verified</span>
+      </div>
+      <div class="ov-sub">SHA-256 Fingerprint Matching</div>
+    </div>
+
+    <div class="ov-card saas-card">
+      <div class="ov-meta">
+        <span class="ov-title">Zero Trust Policy</span>
+        <span class="saas-badge badge-sky"><span class="status-dot dot-sky"></span> Enforced</span>
+      </div>
+      <div class="ov-sub">Mandatory Recipient Authentication</div>
+    </div>
+  </div>
+
+  <!-- Event Log Table -->
+  <div class="events-panel saas-card">
+    <div class="panel-header">
+      <h2>Security Event Log</h2>
+      <span class="saas-badge badge-neutral font-mono">LIVE FEED</span>
+    </div>
+
+    <div class="table-container">
+      <table class="saas-table">
+        <thead>
+          <tr>
+            <th>Time</th>
+            <th>Event Message</th>
+            <th>Severity</th>
+            <th>Details</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let ev of events">
+            <td><span class="font-mono text-muted">{{ ev.time }}</span></td>
+            <td><span class="font-sans font-weight-500">{{ ev.message }}</span></td>
+            <td>
+              <span class="saas-badge" [ngClass]="getSeverityClass(ev.severity)">
+                {{ ev.severity }}
+              </span>
+            </td>
+            <td><span class="font-mono text-secondary">{{ ev.details }}</span></td>
+          </tr>
+          <tr *ngIf="events.length === 0">
+            <td colspan="4" class="empty-cell text-muted">
+              No security events recorded. System operating normally.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

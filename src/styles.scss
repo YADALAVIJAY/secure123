@@ -1,76 +1,232 @@
-/* Global Variables */
+/* ==========================================================================
+   ENTEPRISE CYBERSECURITY DESIGN SYSTEM — CLEAN MINIMAL SAAS
+   ========================================================================== */
+
 :root {
-  --primary-color: #6c5ce7;
-  --secondary-color: #a29bfe;
-  --bg-gradient-start: #1e1e2f;
-  --bg-gradient-end: #2d3436;
-  --text-color: #dfe6e9;
-  --glass-bg: rgba(255, 255, 255, 0.1);
-  --glass-border: rgba(255, 255, 255, 0.2);
-  --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-  --font-family: 'Inter', sans-serif;
+  /* Color Tokens */
+  --bg-dark: #0B0F14;
+  --bg-surface: #11161D;
+  --bg-surface-secondary: #171D25;
+  --border-color: #252C35;
+  --border-subtle: #1E2530;
+  
+  --primary-green: #22C55E;
+  --accent-sky: #38BDF8;
+  --danger-red: #EF4444;
+  --warning-amber: #F59E0B;
+  
+  --text-main: #F8FAFC;
+  --text-secondary: #94A3B8;
+  --text-muted: #64748B;
+  
+  /* Typography */
+  --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  /* Layout Constants */
+  --sidebar-width: 240px;
+  --navbar-height: 64px;
 }
 
-/* Reset & Base Styles */
-* {
+/* Base Reset */
+*, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
 
-body, html {
+html, body {
   height: 100%;
-  font-family: var(--font-family);
-  color: var(--text-color);
-  background: linear-gradient(135deg, #2c3e50, #4ca1af); /* Fallback */
-  background: linear-gradient(135deg, #1A1A2E 0%, #16213E 50%, #0F3460 100%); /* Deep Blue/Purple Theme */
-  background-attachment: fixed;
-  overflow-x: hidden;
+  background-color: var(--bg-dark);
+  color: var(--text-main);
+  font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Utilities */
-.glass-panel {
-  background: var(--glass-bg);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border-radius: 16px;
-  border: 1px solid var(--glass-border);
-  box-shadow: var(--glass-shadow);
+a {
+  color: inherit;
+  text-decoration: none;
 }
 
-.container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 20px;
+button, input, select, textarea {
+  font-family: inherit;
+  font-size: inherit;
 }
 
-.btn-primary {
-  background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 25px;
-  cursor: pointer;
-  font-weight: 600;
-  transition: transform 0.2s, box-shadow 0.2s;
-  
+/* Core SaaS Card Utility */
+.saas-card {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  transition: border-color 0.2s ease;
+
   &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(108, 92, 231, 0.4);
+    border-color: #333B47;
+  }
+
+  &.border-green { border-color: rgba(34, 197, 94, 0.4); }
+  &.border-sky { border-color: rgba(56, 189, 248, 0.4); }
+  &.border-amber { border-color: rgba(245, 158, 11, 0.4); }
+  &.border-red { border-color: rgba(239, 68, 68, 0.4); }
+}
+
+/* Button Utilities */
+.saas-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 9px 18px;
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border: 1px solid transparent;
+  outline: none;
+
+  i {
+    font-size: 0.9rem;
+  }
+
+  &.saas-btn-primary {
+    background-color: var(--primary-green);
+    color: #052E16;
+    font-weight: 600;
+
+    &:hover {
+      background-color: #16A34A;
+    }
+  }
+
+  &.saas-btn-sky {
+    background-color: rgba(56, 189, 248, 0.1);
+    color: var(--accent-sky);
+    border-color: rgba(56, 189, 248, 0.25);
+
+    &:hover {
+      background-color: rgba(56, 189, 248, 0.2);
+    }
+  }
+
+  &.saas-btn-secondary {
+    background-color: var(--bg-surface-secondary);
+    color: var(--text-main);
+    border-color: var(--border-color);
+
+    &:hover {
+      background-color: #1E2632;
+      border-color: #3B4452;
+    }
+  }
+
+  &.saas-btn-danger {
+    background-color: rgba(239, 68, 68, 0.1);
+    color: var(--danger-red);
+    border-color: rgba(239, 68, 68, 0.3);
+
+    &:hover {
+      background-color: rgba(239, 68, 68, 0.2);
+    }
   }
 }
 
-/* Scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
+/* Input Form Controls */
+.saas-input {
+  width: 100%;
+  padding: 10px 14px;
+  background-color: var(--bg-dark);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  color: var(--text-main);
+  font-size: 0.9rem;
+  transition: border-color 0.15s ease;
+
+  &::placeholder {
+    color: var(--text-muted);
+  }
+
+  &:focus {
+    outline: none;
+    border-color: var(--accent-sky);
+  }
 }
-::-webkit-scrollbar-track {
-  background: #1e1e2f; 
-}
-::-webkit-scrollbar-thumb {
-  background: #6c5ce7; 
+
+/* Status Badges */
+.saas-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
   border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+
+  &.badge-green {
+    background-color: rgba(34, 197, 94, 0.12);
+    color: var(--primary-green);
+    border: 1px solid rgba(34, 197, 94, 0.25);
+  }
+
+  &.badge-sky {
+    background-color: rgba(56, 189, 248, 0.12);
+    color: var(--accent-sky);
+    border: 1px solid rgba(56, 189, 248, 0.25);
+  }
+
+  &.badge-amber {
+    background-color: rgba(245, 158, 11, 0.12);
+    color: var(--warning-amber);
+    border: 1px solid rgba(245, 158, 11, 0.25);
+  }
+
+  &.badge-red {
+    background-color: rgba(239, 68, 68, 0.12);
+    color: var(--danger-red);
+    border: 1px solid rgba(239, 68, 68, 0.25);
+  }
+
+  &.badge-neutral {
+    background-color: rgba(148, 163, 184, 0.1);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
+  }
 }
-::-webkit-scrollbar-thumb:hover {
-  background: #a29bfe; 
+
+/* Status Dot Utility */
+.status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  display: inline-block;
+
+  &.dot-green { background-color: var(--primary-green); }
+  &.dot-sky { background-color: var(--accent-sky); }
+  &.dot-amber { background-color: var(--warning-amber); }
+  &.dot-red { background-color: var(--danger-red); }
+  &.dot-muted { background-color: var(--text-muted); }
+}
+
+/* Typography Utilities */
+.font-mono {
+  font-family: var(--font-mono) !important;
+}
+
+.text-secondary {
+  color: var(--text-secondary);
+}
+
+.text-muted {
+  color: var(--text-muted);
+}
+
+.validation-hint, .field-error, .error-text {
+  font-size: 0.78rem;
+  color: var(--danger-red);
+  margin-top: 4px;
+  display: block;
 }

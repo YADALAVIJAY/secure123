@@ -1,122 +1,107 @@
-.navbar {
-    position: fixed;
-    top: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 90%;
-    max-width: 1200px;
-    z-index: 1000;
-    padding: 15px 0;
-    border-radius: 50px;
-    /* Pill shape */
+.navbar-container {
+  height: var(--navbar-height);
+  background-color: var(--bg-surface);
+  border-bottom: 1px solid var(--border-color);
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 90;
 }
 
-.nav-content {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
+.navbar-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
 
-.logo {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: white;
-    text-decoration: none;
-    display: flex;
-    align-items: center;
-    gap: 10px;
+  .mobile-toggle-btn {
+    display: none;
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+    cursor: pointer;
+  }
 
-    i {
-        color: var(--secondary-color);
-    }
-}
-
-.nav-links {
-    display: flex;
-    gap: 10px; // Reduced gap since they have padding now 
-
-    a {
-        color: rgba(255, 255, 255, 0.7);
-        text-decoration: none;
-        font-weight: 500;
-        transition: all 0.3s;
-        position: relative;
-        cursor: pointer;
-        padding: 8px 16px; // Add padding for button shape
-        border-radius: 20px; // Pill shape
-
-        &:hover {
-            color: white;
-            background: rgba(255, 255, 255, 0.1); // Hover background
-        }
-
-        &.active {
-            color: white;
-            background: var(--primary-color); // Active background
-            box-shadow: 0 4px 15px rgba(108, 92, 231, 0.4);
-        }
-
-        // Removed the underline ::after pseudo-element
-    }
-}
-
-.auth-buttons {
+  .breadcrumb-trail {
     display: flex;
     align-items: center;
-    gap: 20px;
+    gap: 8px;
+    font-size: 0.88rem;
 
-    .btn-login {
-        color: white;
-        text-decoration: none;
-        font-weight: 600;
-        padding: 8px 20px;
-        background: var(--primary-color);
-        border-radius: 20px;
-        transition: all 0.3s;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-
-        &:hover {
-            text-decoration: none;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(108, 92, 231, 0.3);
-            background: #564ab1; // Darker shade of primary
-        }
+    .platform-name {
+      color: var(--text-muted);
+      font-weight: 500;
     }
+
+    .sep {
+      color: var(--border-color);
+    }
+
+    .current-page {
+      color: var(--text-main);
+      font-weight: 600;
+    }
+  }
 }
 
-@media (max-width: 768px) {
-    .navbar {
-        width: 95%;
-        /* Use more width on mobile */
-        padding: 10px 0;
-        top: 10px;
+.navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+
+  .health-pill {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 12px;
+    background-color: var(--bg-dark);
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+  }
+
+  .user-menu {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    .user-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: rgba(56, 189, 248, 0.12);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent-sky);
+      font-size: 0.85rem;
     }
 
-    .nav-content {
-        flex-direction: column;
-        gap: 15px;
-        /* Space between logo, links, and auth */
+    .user-name {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--text-main);
     }
+  }
 
-    .nav-links {
-        display: flex;
-        /* Show links on mobile */
-        gap: 10px;
-        flex-wrap: wrap;
-        justify-content: center;
+  .logout-btn {
+    padding: 6px 12px;
+    font-size: 0.82rem;
+  }
+}
 
-        a {
-            font-size: 0.9rem;
-            padding: 6px 12px;
-        }
-    }
+@media (max-width: 900px) {
+  .navbar-left .mobile-toggle-btn {
+    display: block;
+  }
 
-    // ... rest of mobile styles
-    .logo {
-        font-size: 1.25rem;
-    }
-
-    .auth-buttons {
-        gap: 15px;
-    }
+  .health-pill {
+    display: none;
+  }
 }

@@ -22,9 +22,20 @@ export class AuthInterceptor implements HttpInterceptor {
     ) { }
 
     intercept(request: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
+        const token = this.authService.getToken();
+        if (token && !request.headers.has('Authorization')) {
+            request = request.clone({
+                setHeaders: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+        }
+
         return next.handle(request).pipe(
             catchError((error: HttpErrorResponse) => {
-                if (error.status === 403 || error.status === 401) {
+                // Do not convert upload/verify malware security threat into generic session expiration
+                const isFileSecurityRequest = request.url.includes('/files/upload') || request.url.includes('/files/verify');
+                if ((error.status === 401 || (error.status === 403 && !isFileSecurityRequest))) {
                     // Check if we are already on login page to avoid loops
                     if (!this.router.url.includes('/login')) {
                         this.toastService.show('Session expired. Please login again.', 'error');

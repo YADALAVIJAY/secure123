@@ -1,0 +1,77 @@
+<aside class="sidebar-container" [class.mobile-open]="mobileMenuOpen">
+  <!-- Brand Logo -->
+  <div class="sidebar-brand">
+    <a routerLink="/" class="brand-link">
+      <div class="brand-icon">
+        <i class="fa-solid fa-shield-halved"></i>
+      </div>
+      <span class="brand-name">SecureFileShare</span>
+    </a>
+    <button class="mobile-close-btn" (click)="toggleMobileMenu()">
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+  </div>
+
+  <!-- Navigation Sections -->
+  <div class="sidebar-content">
+    <div class="nav-group">
+      <div class="group-label">MAIN</div>
+      <nav class="nav-list">
+        <a routerLink="/dashboard" routerLinkActive="active" class="nav-item">
+          <i class="fa-solid fa-chart-line"></i>
+          <span>Dashboard</span>
+        </a>
+        <a routerLink="/upload" routerLinkActive="active" class="nav-item">
+          <i class="fa-solid fa-arrow-up-from-bracket"></i>
+          <span>Transfer Files</span>
+        </a>
+        <a routerLink="/inbox" routerLinkActive="active" class="nav-item">
+          <i class="fa-solid fa-inbox"></i>
+          <span>My Files</span>
+        </a>
+        <a routerLink="/threat-monitor" routerLinkActive="active" class="nav-item">
+          <i class="fa-solid fa-shield-virus"></i>
+          <span>Security</span>
+        </a>
+        <a routerLink="/sent" routerLinkActive="active" class="nav-item">
+          <i class="fa-solid fa-clock-rotate-left"></i>
+          <span>Activity</span>
+        </a>
+      </nav>
+    </div>
+
+    <div class="nav-group" *ngIf="authService.isLoggedIn()">
+      <div class="group-label">ACCOUNT</div>
+      <nav class="nav-list">
+        <a routerLink="/profile" routerLinkActive="active" class="nav-item">
+          <i class="fa-solid fa-user"></i>
+          <span>Profile Settings</span>
+        </a>
+        <button class="nav-item logout-btn" (click)="logout()">
+          <i class="fa-solid fa-arrow-right-from-bracket"></i>
+          <span>Log Out</span>
+        </button>
+      </nav>
+    </div>
+
+    <!-- Health Telemetry -->
+    <div class="sidebar-footer">
+      <div class="footer-status-card">
+        <div class="status-row">
+          <span class="status-name">ClamAV Scanner</span>
+          <span class="status-indicator">
+            <span class="status-dot dot-green"></span>
+            Online
+          </span>
+        </div>
+        <div class="status-row">
+          <span class="status-name">Zero Trust Policy</span>
+          <span class="status-indicator text-sky">
+            <span class="status-dot dot-sky"></span>
+            Active
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</aside>

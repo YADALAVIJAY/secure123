@@ -1,7 +1,32 @@
-.main-content {
-    padding-top: 100px;
-    /* Space for fixed navbar */
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
+.soc-layout {
+  display: flex;
+  min-height: 100vh;
+  background-color: var(--bg-dark);
+}
+
+.soc-main {
+  flex: 1;
+  margin-left: var(--sidebar-width);
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  transition: margin-left 0.25s ease;
+}
+
+.page-container {
+  flex: 1;
+  padding: 32px;
+  max-width: 1320px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+@media (max-width: 900px) {
+  .soc-main {
+    margin-left: 0;
+  }
+
+  .page-container {
+    padding: 20px 16px;
+  }
 }

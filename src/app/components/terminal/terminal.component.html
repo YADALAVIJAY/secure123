@@ -1,0 +1,15 @@
+<div class="terminal-container saas-card">
+  <div class="terminal-header">
+    <div class="header-left">
+      <i class="fa-solid fa-terminal text-sky"></i>
+      <span class="terminal-title">{{ title }}</span>
+    </div>
+    <span class="saas-badge badge-neutral font-mono">{{ displayedLogs.length }} EVENTS</span>
+  </div>
+  <div class="terminal-body font-mono">
+    <div class="log-line" *ngFor="let log of displayedLogs">
+      <span class="prompt-sym">&gt;</span>
+      <span class="log-text">{{ log }}</span>
+    </div>
+  </div>
+</div>

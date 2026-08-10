@@ -11,7 +11,8 @@ import { ToastService } from '../../../services/toast.service';
 })
 export class LoginComponent implements OnInit {
   loginForm!: FormGroup;
-  errorMessage: string = '';
+  errorMessage = '';
+  isAuthenticating = false;
 
   constructor(
     private fb: FormBuilder,
@@ -31,24 +32,26 @@ export class LoginComponent implements OnInit {
     });
   }
 
-  onSubmit() {
+  onSubmit(): void {
     if (this.loginForm.valid) {
+      this.isAuthenticating = true;
       this.authService.login(this.loginForm.value).subscribe({
-        next: (response) => {
-          this.toastService.show('Login successful! Welcome back.', 'success');
-          this.router.navigate(['/']);
+        next: () => {
+          this.isAuthenticating = false;
+          this.toastService.show('Authentication verified. Welcome back.', 'success');
+          this.router.navigate(['/dashboard']);
         },
         error: (error) => {
+          this.isAuthenticating = false;
           console.error('Login failed', error);
-          // Backend returns { message: "..." }
-          const msg = error.error?.message || 'Login failed. Please check your credentials.';
+          const msg = error.error?.message || error.error || 'Authentication failed. Please check credentials.';
           this.errorMessage = msg;
           this.toastService.show(msg, 'error');
         }
       });
     } else {
       this.loginForm.markAllAsTouched();
-      this.toastService.show('Please fill in all required fields', 'info');
+      this.toastService.show('Please enter both username and password.', 'info');
     }
   }
 }

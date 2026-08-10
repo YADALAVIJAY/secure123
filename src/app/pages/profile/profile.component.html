@@ -1,98 +1,105 @@
-<div class="profile-container">
-    <div class="profile-card glass-panel">
-        <div class="profile-header">
-            <div class="avatar">
-                <i class="fa-solid fa-user-circle"></i>
-            </div>
-            <h1>{{ username }}</h1>
-            <p class="email">{{ email }}</p>
+<div class="profile-page">
+  <div class="page-header">
+    <h1>Account Profile</h1>
+    <p class="page-subtitle">Security identity management and cryptographic key vault.</p>
+  </div>
+
+  <div class="loading-state saas-card" *ngIf="isLoading">
+    <i class="fa-solid fa-circle-notch fa-spin text-sky"></i> Fetching profile data...
+  </div>
+
+  <div class="profile-grid" *ngIf="!isLoading">
+    <!-- User Information Card -->
+    <div class="profile-card saas-card">
+      <div class="card-header">
+        <h2>Operator Identity</h2>
+        <span class="saas-badge badge-green"><span class="status-dot dot-green"></span> Authenticated</span>
+      </div>
+
+      <div class="info-list font-sans">
+        <div class="info-item">
+          <span class="label">Username</span>
+          <span class="val font-semibold">{{ username }}</span>
         </div>
 
-        <div class="profile-section">
-            <h2><i class="fa-solid fa-key"></i> Encryption Keys</h2>
-            <p class="section-subtitle">Your RSA-2048 key pair for secure file transfer</p>
-
-            <!-- Public Key -->
-            <div class="key-card">
-                <div class="key-header">
-                    <label>
-                        <i class="fa-solid fa-lock-open"></i>
-                        Public Key
-                    </label>
-                    <button class="btn-copy" (click)="copyToClipboard(publicKey, 'Public key')">
-                        <i class="fa-solid fa-copy"></i>
-                        Copy
-                    </button>
-                </div>
-                <div class="key-content">
-                    <code>{{ publicKey }}</code>
-                </div>
-                <p class="key-info">
-                    <i class="fa-solid fa-info-circle"></i>
-                    Others use this to encrypt files for you
-                </p>
-            </div>
-
-            <!-- Private Key -->
-            <div class="key-card private-key-card">
-                <div class="key-header">
-                    <label>
-                        <i class="fa-solid fa-key"></i>
-                        Private Key
-                    </label>
-                    <div class="key-actions">
-                        <button class="btn-toggle" (click)="togglePrivateKeyVisibility()">
-                            <i class="fa-solid" [class.fa-eye]="!showPrivateKey"
-                                [class.fa-eye-slash]="showPrivateKey"></i>
-                            {{ showPrivateKey ? 'Hide' : 'Show' }}
-                        </button>
-                        <button class="btn-copy" (click)="copyPrivateKey()">
-                            <i class="fa-solid fa-copy"></i>
-                            Copy
-                        </button>
-                        <button class="btn-download" (click)="downloadPrivateKey()">
-                            <i class="fa-solid fa-download"></i>
-                            Download
-                        </button>
-                    </div>
-                </div>
-                <div class="key-content" *ngIf="showPrivateKey">
-                    <code>{{ privateKey }}</code>
-                </div>
-                <div class="key-content masked" *ngIf="!showPrivateKey">
-                    <code>●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●</code>
-                </div>
-                <div class="warning-box">
-                    <i class="fa-solid fa-exclamation-triangle"></i>
-                    <div>
-                        <strong>Keep this private!</strong>
-                        <p>Never share your private key. You need it to decrypt files sent to you.</p>
-                    </div>
-                </div>
-            </div>
+        <div class="info-item">
+          <span class="label">Email Address</span>
+          <span class="val text-secondary">{{ email }}</span>
         </div>
+
+        <div class="info-item">
+          <span class="label">Encryption Standard</span>
+          <span class="val text-sky">RSA-OAEP 2048-bit + AES-256-GCM</span>
+        </div>
+
+        <div class="info-item key-item">
+          <span class="label">RSA Public Key</span>
+          <span class="key-preview font-mono text-muted">{{ publicKey ? (publicKey.slice(0, 75) + '...') : '—' }}</span>
+          <button class="saas-btn saas-btn-secondary compact-btn" (click)="copyToClipboard(publicKey, 'Public Key')">
+            <i class="fa-solid fa-copy"></i> Copy Public Key
+          </button>
+        </div>
+      </div>
     </div>
-</div>
 
-<!-- Password Verification Modal -->
-<div class="modal-overlay" *ngIf="showPasswordModal">
-    <div class="modal-card glass-panel">
-        <div class="modal-header">
-            <h3><i class="fa-solid fa-lock"></i> Verify Identity</h3>
-            <button class="btn-close" (click)="closePasswordModal()"><i class="fa-solid fa-times"></i></button>
-        </div>
-        <div class="modal-body">
-            <p>Please enter your password to access your Private Key.</p>
-            <div class="form-group">
-                <input type="password" [(ngModel)]="passwordInput" placeholder="Enter your password"
-                    (keyup.enter)="verifyPassword()" autofocus>
-            </div>
-            <div class="modal-actions">
-                <button class="btn-cancel" (click)="closePasswordModal()">Cancel</button>
-                <button class="btn-verify" (click)="verifyPassword()" [disabled]="!passwordInput || verifyLoading">
-                    {{ verifyLoading ? 'Verifying...' : 'Verify' }}
-                </button>
-            </div>
-        </div>
+    <!-- Private Key Management Card -->
+    <div class="profile-card saas-card">
+      <div class="card-header">
+        <h2>Cryptographic Vault</h2>
+        <span class="saas-badge badge-neutral">RSA-2048</span>
+      </div>
+
+      <p class="vault-desc">Your RSA private key is stored in encrypted vault format. Password verification is required to view or export your private key.</p>
+
+      <div class="vault-actions">
+        <button class="saas-btn saas-btn-sky" (click)="togglePrivateKeyVisibility()">
+          <i class="fa-solid {{ showPrivateKey ? 'fa-eye-slash' : 'fa-eye' }}"></i>
+          {{ showPrivateKey ? 'Hide Key' : 'Reveal Key' }}
+        </button>
+
+        <button class="saas-btn saas-btn-secondary" (click)="copyPrivateKey()">
+          <i class="fa-solid fa-copy"></i> Copy
+        </button>
+
+        <button class="saas-btn saas-btn-secondary" (click)="downloadPrivateKey()">
+          <i class="fa-solid fa-download"></i> Download
+        </button>
+      </div>
+
+      <div class="key-display-box" *ngIf="showPrivateKey && privateKey">
+        <div class="box-label font-mono text-muted">DECRYPTED PRIVATE KEY</div>
+        <textarea readonly class="saas-input font-mono text-green" rows="5">{{ privateKey }}</textarea>
+      </div>
     </div>
+  </div>
+
+  <!-- Password Verification Modal -->
+  <div class="modal-overlay" *ngIf="showPasswordModal">
+    <div class="password-dialog saas-card border-sky">
+      <div class="dialog-header">
+        <h3>Verify Identity Password</h3>
+        <button class="close-btn" (click)="closePasswordModal()"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <div class="dialog-body">
+        <p class="dialog-sub">Enter your account password to authorize access to your private key vault:</p>
+        <input
+          type="password"
+          class="saas-input"
+          [(ngModel)]="passwordInput"
+          placeholder="Enter current password..."
+          (keyup.enter)="verifyPassword()"
+        />
+
+        <div class="dialog-actions">
+          <button class="saas-btn saas-btn-secondary" (click)="closePasswordModal()">Cancel</button>
+          <button class="saas-btn saas-btn-primary" (click)="verifyPassword()" [disabled]="verifyLoading">
+            <i class="fa-solid fa-shield-halved" *ngIf="!verifyLoading"></i>
+            <i class="fa-solid fa-circle-notch fa-spin" *ngIf="verifyLoading"></i>
+            Verify &amp; Authorize
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
